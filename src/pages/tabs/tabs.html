@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>{{_pageTitle}}</ion-title>
+    <ion-buttons left>
+      <button ion-button menuToggle icon-only >
+        <ion-icon name="menu"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-buttons right>
+      <button ion-button icon-only>
+        <ion-icon name="cash"></ion-icon>
+      </button>
+      <ion-title>{{userService.balance}}</ion-title>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<super-tabs tabsPlacement="bottom" toolbarColor="primary" (tabSelect)="onTabSelect($event)">
+  <super-tab [root]="tab1Root" [rootParams]="{'nav':_nav}" title="Home" id="Home" icon="home"></super-tab>
+  <super-tab [root]="tab2Root" [rootParams]="{'nav':_nav}" title="Groups" id="Groups" icon="people"></super-tab>
+  <super-tab [root]="tab3Root" [rootParams]="{'nav':_nav}" title="Send" id="Send" icon="send"></super-tab>
+  <super-tab [root]="tab4Root" [rootParams]="{'nav':_nav}" title="Offer" id="Offer" icon="pricetag"></super-tab>
+</super-tabs>

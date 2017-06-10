@@ -1,0 +1,9 @@
+page-tabs {
+
+}
+
+//it seems that supertabs removes the <page-tabs> tag so we can't nest it
+//todo: make this dynamic based on header height
+super-tabs-container {
+  margin-top: 56px;
+}

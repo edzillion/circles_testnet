@@ -1,0 +1,56 @@
+group-card {
+
+  ion-card-content {
+    height:100%;
+  }
+
+  .header-button {
+    height: 1.6rem;
+    margin-top: 0;
+  }
+
+  .profile-item {
+    margin: 5px;
+    width:50px;
+    height:50px;
+    float:left;
+  }
+
+  .req-met {
+    color:map-get($colors, 'go');
+  }
+  .req-not-met {
+    color:map-get($colors, 'stop');
+  }
+
+  .requirements-text-col {
+    color:map-get($colors, 'primary');
+    font-size: .8em;
+    margin-top: 5px;
+  }
+
+  .icon-col {
+    margin-top: 5px;
+  }
+
+  .group-button {
+    font-size: 1rem;
+    margin-top:0;
+    height: 2.2rem;
+  }
+
+  .offer-segment-button {
+    background-color: map-get($colors, 'primary') !important;
+    color:white !important;
+    margin:2px;
+  }
+
+  .offer-detail-row img {
+    max-height: 100px;
+  }
+
+  .buy-offer-button {
+    float:right;
+  }
+
+}

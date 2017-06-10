@@ -1,0 +1,89 @@
+<ion-card>
+
+  <ion-card-header>
+    <span class="header-text" left>
+      <button [disabled]="!_isAMember" class="header-button" ion-button icon-only (click)="toggleShowGroup()">
+        <ion-icon name="{{_headerIcon}}"></ion-icon>
+      </button>
+      {{_name}}
+    </span>
+  </ion-card-header>
+
+  <ion-card-content [ngStyle]="{'height' : _contentHeight+'px' }" padding>
+    <span *ngIf="!active">
+      <p>{{group.description}}</p>
+      <ion-item-divider></ion-item-divider>
+      <ion-row>
+        <ion-col class="requirements-text-col" left col-4>
+          <span>REQUIREMENTS</span>
+        </ion-col>
+        <ion-col class="icon-col" col-1 *ngFor="let req of groupRequirements | async">
+          <ion-icon icon-only name="{{req.icon}}" [ngClass]="{'req-not-met': !req.isComplete, 'req-met': req.isComplete}"></ion-icon>
+        </ion-col>
+        <ion-col text-right *ngIf="!_isAMember">
+          <button class="group-button" ion-button [disabled]="!_allRequirementsMet || _hasApplied" (click)="joinGroup()" >
+            <span *ngIf="_noConfirm">Join</span>
+            <span *ngIf="!_noConfirm && !_hasApplied">Apply</span>
+            <span *ngIf="_hasApplied">Pending</span>
+          </button>
+        </ion-col>
+      </ion-row>
+    </span>
+    <span *ngIf="active">
+      <ion-list>
+          <h2>Members</h2>
+        <ion-item>
+          <div *ngFor="let member of _members" class="profileItem" (click)="selectMember(member)">
+            <img class="profile-item" src="{{member.profilePicURL}}">
+          </div>
+        </ion-item>
+          <h2>Trade</h2>
+        <ion-item>
+          <ion-segment [(ngModel)]="_view" color="primary">
+            <ion-segment-button class="offer-segment-button" value="offers" (ionSelect)="selectedOffers()">
+              Offers
+            </ion-segment-button>
+            <ion-segment-button class="offer-segment-button" value="wants" (ionSelect)="selectedWants()">
+              Wants
+            </ion-segment-button>
+          </ion-segment>
+          <span *ngIf="!_offerSelected">
+            <div *ngIf="_view == 'offers'" class="item row">
+              <div *ngFor="let offer of groupOffers" class="profileItem" (click)="selectOffer(offer)">
+                <img class="profile-item" src="{{offer.picURL}}">
+              </div>
+            </div>
+            <div *ngIf="_view == 'wants'" class="item row">
+              <div *ngFor="let want of groupWants" class="profileItem">
+                <img class="profile-item" src="{{member.profilePicURL}}">
+              </div>
+            </div>
+          </span>
+        </ion-item>
+        <ion-item *ngIf="_offerSelected">
+          <ion-row class="offer-detail-row">
+            <ion-col>
+              <img [src]="_offerSelected.picURL">
+            </ion-col>
+            <ion-col>
+              <h2>{{_offerSelected.title}}</h2>
+              <p>{{_offerSelected.description}}
+            </ion-col>
+          </ion-row>
+          <span>
+            Purchase for {{_offerSelected?.price}} Circles?
+          </span>
+          <span class="buy-offer-button">
+            <button ion-button color="danger" (click)="_offerSelected = null">
+              CANCEL
+            </button>
+            <!-- disable if the user is the seller, can't buy your own stuff! -->
+            <button [disabled]="_offerSelected.sellerKey == user.$key" ion-button (click)="buyOffer()">
+              BUY
+            </button>
+          </span>
+        </ion-item>
+      </ion-list>
+    </span>
+  </ion-card-content>
+</ion-card>

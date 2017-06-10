@@ -1,0 +1,21 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>
+      Circles
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content>
+  <div text-center>
+    <ion-icon name="lock" style="zoom:12.0;">
+    </ion-icon>
+  </div>
+
+  <span class="error" *ngIf="error">{{ error }}</span>
+
+  <button ion-button full (click)="loginFb()"><span icon="facebook"></span>Login With Facebook</button>
+  <button ion-button full (click)="loginGoogle()"><span icon="google"></span>Login With Google</button>
+  <button ion-button full (click)="loginEmail()"><span icon="mail"></span>Login With Email</button>
+
+  <a (click)="goSignup()" class="signupEmailPageLink">No account? <strong>Create one here</strong></a>
+</ion-content>

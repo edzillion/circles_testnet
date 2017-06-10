@@ -1,0 +1,15 @@
+page-purchase-modal {
+  ion-icon {
+    &[name="checkmark-circle"] {
+      color:green;
+    }
+    &[name="close-circle"] {
+      color:red;
+    }
+  }
+  ion-label {
+    ion-icon {
+        padding-right: 10px;
+    }
+  }
+}

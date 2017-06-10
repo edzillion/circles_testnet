@@ -1,0 +1,11 @@
+{
+  "globalDependencies": {
+    "cordova": "registry:dt/cordova#0.0.0+20160819210047",
+    "cordova-plugin-camera": "registry:dt/cordova-plugin-camera#0.0.0+20160819210047",
+    "es6-shim": "registry:dt/es6-shim#0.31.2+20160726072212",
+    "firebase": "registry:dt/firebase#2.4.1+20160510002910"
+  },
+  "dependencies": {
+    "debug": "registry:npm/debug#2.0.0+20170504163145"
+  }
+}

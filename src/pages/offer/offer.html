@@ -1,0 +1,55 @@
+<ion-content padding>
+  <ion-row>
+    <ion-col col-8 offset-2>
+      Take a photo of your offer
+    </ion-col>
+  </ion-row>
+  <form [formGroup]="offerForm" (ngSubmit)="onSubmit(offerForm.value, offerForm.valid)">
+    <ion-input hidden formControlName="picURL" type="text"></ion-input>
+    <ion-input hidden formControlName="latitude" type="text"></ion-input>
+    <ion-input hidden formControlName="longitude" type="text"></ion-input>
+    <ion-row>
+      <ion-col col-6 offset-3>
+
+        <img class="profile-pic" src="https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/tradepics%2Fbox.jpg?alt=media&token=7e11b592-1649-4740-bc42-e562118e3833" *ngIf="offerForm.controls.picURL.pristine">
+        <img class="profile-pic" [src]="ds.bypassSecurityTrustUrl(offerForm.controls.picURL.value)" *ngIf="offerForm.controls.picURL.valid && offerForm.controls.picURL.dirty">
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col col-8 offset-2>
+        <button type="button" ion-button full (click)="openCamera(offerForm)">Open camera</button>
+        <button type="button" ion-button full (click)="selectFromGallery(offerForm)">Select from gallery</button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label>Offer Title</ion-label>
+          <ion-input formControlName="title" type="text"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>Offer Price</ion-label>
+          <ion-input formControlName="price" type="number"></ion-input>
+          <ion-select right formControlName="priceDescription" placeholder="Per Item ?">
+            <ion-option>One Item</ion-option>
+            <ion-option>Per Item</ion-option>
+            <ion-option>Per Hour</ion-option>
+            <ion-option>Per Day</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col col-8 offset-2>
+        <button type="button" [disabled]="offerForm.controls.latitude.value" ion-button full (click)="getCurrentLocation()">Set Current Location</button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item-divider>
+          <button ion-button full type="submit" [disabled]="!offerForm.valid">List Offer</button>
+        </ion-item-divider>
+      </ion-col>
+    </ion-row>
+  </form>
+</ion-content>

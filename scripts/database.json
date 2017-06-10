@@ -1,0 +1,175 @@
+{
+  "static" : {
+    "groupRequirements" : {
+      "email" : {
+        "displayName" : "Email",
+        "icon" : "mail",
+        "message" : "You need to confirm your email address."
+      },
+      "facebook" : {
+        "displayName" : "Facebook",
+        "icon" : "logo-facebook",
+        "message" : "You need to add your Facebook profile."
+      },
+      "google" : {
+        "displayName" : "Google",
+        "icon" : "google",
+        "message" : "You need to add your Google+ profile."
+      },
+      "name" : {
+        "displayName" : "Name",
+        "icon" : "brush",
+        "message" : "You need to add your full name."
+      },
+      "noconfirm" : {
+        "displayName" : "No Confirmation Needed",
+        "icon" : "locked",
+        "message" : "You can join this group instantly."
+      },
+      "passport" : {
+        "displayName" : "Passport",
+        "icon" : "document",
+        "message" : "You need to add your Passport."
+      },
+      "photo" : {
+        "displayName" : "Profile Photo",
+        "icon" : "contact",
+        "message" : "You need to add a profile photo."
+      },
+      "review" : {
+        "displayName" : "Application Review Required",
+        "icon" : "clipboard",
+        "message" : "This group will review your application."
+      },
+      "soundcloud" : {
+        "displayName" : "SoundCloud",
+        "icon" : "cloud",
+        "message" : "You need to confirm your SoundCloud account."
+      },
+      "steam" : {
+        "displayName" : "Steam",
+        "icon" : "steam",
+        "message" : "You need to confirm your Steam account."
+      }
+    }
+  },
+  "groups" : {
+    "-Kk1Xr2syRJ0V7NDKjSK" : {
+      "description" : "Tinyhouse university is a Berlin-based NGO founded by Van Bo Le-Mentzel, designers, education activists and refugees. Our goal is to create new models of social neighborhoods. Our tools are architecture and the beliefs that make diversity a village stronger than common sense.",
+      "displayName" : "Tinyhouse University Group",
+      "members" : [ "5jrFiCphYKbDZ4FeSMFuhMM8wzw2" ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Ftinyu.png?alt=media&token=a61c66b6-d6af-46a8-ad73-3a5f853ba99e",
+      "requirements" : [ "email", "name", "photo", "noconfirm" ]
+    },
+    "-Kk1Xr2x-iftLqPsxscG" : {
+      "description" : "Berlin Basic Income is a local group that explores strategies to implement a universal basic income (UBI), including unconventional methods that may start outside of the usual political process (e.g. the basic income cryptocurrency Circles). ",
+      "displayName" : "Berlin Basic Income Lab Group",
+      "members" : [ "J56XFbhioecI8PTQb90NKe5bwB13" ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Flab.png?alt=media&token=062c962c-9826-4714-98df-ba6c9d4fb166",
+      "requirements" : [ "email", "name", "photo", "facebook" ]
+    },
+    "-Kk1Xr2ytzY1xPWUVXWP" : {
+      "description" : "Kreuzberg Music co-op is a group dedicated to sharing the means of music production. If you are a musician or a music lover this is the place for you.",
+      "displayName" : "Kreuzberg Music Co-op Group",
+      "members" : [ "SKMdyuZc5cRdje6GHiXzcEL7wQs1" ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2FCClogo.png?alt=media&token=cc46a2db-297f-4558-a6cc-1d1a7aef02d5",
+      "requirements" : [ "email", "name", "photo", "facebook", "soundcloud" ]
+    },
+    "-Kk1Xr2ytzY1xPWUVXWQ" : {
+      "description" : "Radwerk is a collective of Berlin bike shops. We share resources, time and knowledge :)",
+      "displayName" : "Radwerk Group",
+      "members" : [ "7H0ByozNeBgwy2ZdQjWnTk2ZbCN2" ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Frepair.png?alt=media&token=4d837bc7-7f92-4255-943a-5b34778e5a7d",
+      "requirements" : [ "name", "photo", "review" ]
+    },
+    "-Kk1Xr2ytzY1xPWdcEEf" : {
+      "description" : "For hardcore gamerz only!",
+      "displayName" : "Gamer Group",
+      "members" : [ "7H0ByozNeBgwy2ZdQjWnTk2ZbCN2", "SKMdyuZc5cRdje6GHiXzcEL7wQs1" ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgamecoop.png?alt=media&token=a8b6a45d-7249-46ab-90de-6f34a491c608",
+      "requirements" : [ "name", "photo", "steam" ]
+    }
+  },
+  "users" : {
+    "5jrFiCphYKbDZ4FeSMFuhMM8wzw2" : {
+      "balance" : 650,
+      "createdAt" : 1496781495492,
+      "displayName" : "Cafe Grundeinkommen",
+      "email" : "basicincomeberlin@gmail.com",
+      "log" : {
+        "0" : {
+          "timestamp" : 1496781495492,
+          "type" : "createProfile"
+        }
+      },
+      "offers" : [ {
+        "picURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/tradepics%2Fcoffee.jpg?alt=media&token=201f2112-cbc2-4951-84a9-8ea694100be3",
+        "price" : 50,
+        "priceDescription": "For One",
+        "seller": "5jrFiCphYKbDZ4FeSMFuhMM8wzw2",
+        "timestamp": 1496952402440,
+        "title" : "Hot Cup of Coffee"
+      }, {
+        "picURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/tradepics%2Fmuffin.jpg?alt=media&token=a0f53c7e-5f47-44f9-9ea9-69e165bf68ad",
+        "price" : 30,
+        "seller": "5jrFiCphYKbDZ4FeSMFuhMM8wzw2",
+        "priceDescription": "For One",
+        "timestamp": 1496952402440,
+        "title" : "Vegan Muffin"
+      } ],
+      "organisation" : "Cafe Grundeinkommen",
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2FI4V4vhOejVNSkoJSj3LOMKCYoGh1?alt=media&token=719e5232-0766-4a7f-aab3-f7587813f52c",
+      "tagline" : "Basic Income Now!",
+      "type" : "organisation",
+      "wants" : [ {
+        "price" : 150,
+        "quantityDescription" : "Per Kilo",
+        "timestamp": 1496952402440,
+        "title" : "Fairtrade Coffee Beans"
+      } ],
+      "website" : "www.cafe-grundeinkommen.org"
+    },
+    "7H0ByozNeBgwy2ZdQjWnTk2ZbCN2" : {
+      "balance" : 143,
+      "createdAt" : 1496952402440,
+      "displayName" : "Jane Smith",
+      "email" : "fafafa@fafa.com",
+      "firstName" : "Jane",
+      "lastName" : "Smith",
+      "log" : [ {
+        "timestamp" : 1496952402440,
+        "type" : "createProfile"
+      } ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2F7H0ByozNeBgwy2ZdQjWnTk2ZbCN2?alt=media&token=bb7fd08b-3a73-4b4e-a082-535e00c59580",
+      "type" : "individual"
+    },
+    "J56XFbhioecI8PTQb90NKe5bwB13" : {
+      "balance" : 143,
+      "createdAt" : 1496952177281,
+      "displayName" : "Ed Murphy",
+      "email" : "edzillion@gmail.com",
+      "firstName" : "Ed",
+      "lastName" : "Murphy",
+      "log" : [ {
+        "timestamp" : 1496952177281,
+        "type" : "createProfile"
+      } ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgeneric-profile-pic.png?alt=media&token=d151cdb8-115f-483c-b701-e227d52399ef",
+      "type" : "individual"
+    },
+    "SKMdyuZc5cRdje6GHiXzcEL7wQs1" : {
+      "balance" : 143,
+      "createdAt" : 1496952304626,
+      "displayName" : "Baba Blacksheep",
+      "email" : "baba@baba.com",
+      "firstName" : "Baba",
+      "lastName" : "Blacksheep",
+      "log" : [ {
+        "timestamp" : 1496952304626,
+        "type" : "createProfile"
+      } ],
+      "profilePicURL" : "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2FSKMdyuZc5cRdje6GHiXzcEL7wQs1?alt=media&token=55d8de36-d8f1-4094-a663-47c8adfe4951",
+      "type" : "individual"
+    }
+  }
+}

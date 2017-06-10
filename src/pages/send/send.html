@@ -1,0 +1,48 @@
+<ion-content padding>
+  <ion-row>
+    <ion-col col-8 offset-2>
+      Send Circles to another user
+    </ion-col>
+  </ion-row>
+
+    <ion-row>
+      <div *ngIf="_searchUsers" class="search-list-backdrop"></div>
+      <ion-searchbar [(ngModel)]="_searchTerm" (ionInput)="setFilteredItems()"></ion-searchbar>
+
+      <ion-list class="user-search-list">
+          <ion-item *ngFor="let searchUser of _searchUsers | async" (click)="clickUser(searchUser)">
+              {{searchUser.displayName}}
+          </ion-item>
+      </ion-list>
+    </ion-row>
+    <form [formGroup]="_sendForm" (ngSubmit)="onSubmit(_sendForm.value, _sendForm.valid)">
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label>Recipient</ion-label>
+          <ion-input hidden formControlName="toUserKey" type="text"></ion-input>
+          <div item-content>{{ _toUser?.displayName }}</div>
+        </ion-item>
+        <ion-item>
+          <ion-label>Amount?</ion-label>
+          <ion-input formControlName="amount" type="number"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>Message</ion-label>
+          <ion-input formControlName="message" type="text"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-item-divider>
+          <!-- <button ion-button full (click)="onDebugClick()">List Offer</button> -->
+          <button ion-button full type="submit" [disabled]="!_sendForm.valid">Send Circles</button>
+        </ion-item-divider>
+      </ion-col>
+    </ion-row>
+  </form>
+</ion-content>
