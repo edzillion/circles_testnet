@@ -9,6 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import { KeyToUserPipe } from '../../pipes/key-to-user/key-to-user';
 
 import { NewsService } from '../../providers/news-service/news-service';
+import { UserService } from '../../providers/user-service/user-service';
 
 import * as firebase from 'firebase/app';
 
@@ -17,74 +18,95 @@ export class TransactionService {
 
   public transact: Subject<any> = new Subject<any>();
 
-  private _transactionIntent = {
-    fromUser: <string> null,
-    toUser: <string> null,
-    item: <any> {title:null},
-    amount:<number>100
+  private user: any;
+  private transactionLog: FirebaseListObservable<any>;
+
+  constructor(private userService: UserService, private newsService: NewsService, private db: AngularFireDatabase, private keyToUserPipe: KeyToUserPipe) {
+
+    userService.userSubject.subscribe(
+      user => this.user = user,
+      err => console.error(err),
+      () => {}
+    );
+
+    this.transactionLog = db.list('/transactions/');
   }
 
-  private _transactionLog: FirebaseListObservable<any>;
 
-  constructor(private newsService: NewsService, private _db: AngularFireDatabase, private _keyToUserPipe: KeyToUserPipe) {
-
-    this._transactionLog = _db.list('/transactions/');
-  }
-
-
-  //todo: why is amount a string here?!!?!?!
-  transfer(fromUser, toUser, amount, message?) {
-
-    //todo: replace all this with a user interface (model)
-    let fromUserBalance: number = +fromUser.balance;
+  transfer(toUser, amount) {
+    let myBalance: number = +this.user.balance;
     let toUserBalance: number = +toUser.balance;
     let txAmount: number = +amount;
 
-    if (fromUserBalance < txAmount)
+    if (myBalance < txAmount)
       return false;
 
-    fromUserBalance -= txAmount;
+    myBalance -= txAmount;
     toUserBalance += txAmount;
-    this._db.object('/users/'+fromUser.$key).update({balance: fromUserBalance});
-    this._db.object('/users/'+toUser.$key).update({balance: toUserBalance});
+    this.db.object('/users/'+this.user.$key).update({balance: myBalance});
+    this.db.object('/users/'+toUser.$key).update({balance: toUserBalance});
+    return true;
+  }
+
+  logTransfer(toUser, offer, type, message?) {
 
     let logItem = {
-      "from" : fromUser.$key,
+      "from" : this.user.$key,
       "to" : toUser.$key,
       "timestamp" : firebase.database['ServerValue']['TIMESTAMP'],
-      "amount" : <number>amount,
-      "type": 'transaction',
-      "message": message || ''
+      "amount" : <number>offer.price,
+      "message": message || '',
+      "title": offer.title,
+      "type": type
     };
 
-    //add to the main t log
-    this._transactionLog.push(logItem);
-    // add to my log
-    this.newsService.addNewsItem(logItem);
+    //add to the main transaction log
+    this.transactionLog.push(logItem);
+
     //add to other user's log
-    let toUserLog = this._db.list('/users/'+toUser.$key+'/log/');
+    logItem.to = '';
+    if (logItem.type == 'purchase')
+      logItem.type = 'sale';
+
+    let toUserLog = this.db.list('/users/'+toUser.$key+'/log/');
     toUserLog.push(logItem);
   }
 
-  createPurchaseIntent(buyerUserId, sellerUserId, offer): boolean {
-
-    let buyerUser = this._keyToUserPipe.transform(buyerUserId);
-    let sellerUser = this._keyToUserPipe.transform(sellerUserId);
-
-    Observable.forkJoin(buyerUser,sellerUser).subscribe( (res) => {
-      this.transfer(res[0], res[1], offer.price);
+  createPurchaseIntent(sellerUserId, offer): Promise<boolean> {
+    let p = new Promise( (resolve, reject) => {
+      this.keyToUserPipe.transform(sellerUserId).subscribe( (sellerUser) => {
+        if (this.transfer(sellerUser, offer.price)) {
+          this.logTransfer(sellerUser, offer, 'purchase');
+          this.newsService.addPurchase(offer);
+          resolve(true);
+        }
+        else
+          reject(new Error("Purchase Failed"));
+      });
     });
-    return true;
+
+    return p;
   }
 
-  createTransactionIntent(fromUserId:string, toUserId:string, amount:number, message?:string): boolean {
-
-    let fUserId = this._keyToUserPipe.transform(fromUserId);
-    let tUserId = this._keyToUserPipe.transform(toUserId);
-
-    Observable.forkJoin(fUserId,tUserId).subscribe( (res) => {
-      this.transfer(res[0], res[1], amount, message);
+  createTransactionIntent(toUserId:string, amount:number, message?:string): Promise<boolean> {
+    let p = new Promise( (resolve, reject) => {
+      this.keyToUserPipe.transform(toUserId).subscribe( (toUser) => {
+        if(this.transfer(toUserId, amount)) {
+          let offerObj = {
+            price:amount,
+            title:'Transaction',
+            to: toUserId,
+            toUser: toUser
+          };
+          this.logTransfer(toUserId, offerObj, 'transfer', message);
+          this.newsService.addTransaction(offerObj);
+          resolve(true);
+        }
+        else
+          reject(new Error("Purchase Failed"));
+      });
     });
-    return true;
+
+    return p;
   }
 }

@@ -14,38 +14,34 @@ export class UserService {
   public userSubject: BehaviorSubject<any>;
   public initSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
   public authSub: Subscription;
-
-  private user: FirebaseObjectObservable<any>;
-
+  public auth: any;
 
   constructor(public afAuth: AngularFireAuth, private db: AngularFireDatabase, @Inject( APP_CONFIG ) private config: IAppConfig) {
 
-
+    this.auth = afAuth.auth;
     this.authSub = afAuth.authState.subscribe(
       auth => {
-        debugger;
         if (auth) {
-          let userSub = this.db.object('/users/' + auth.uid).first().subscribe(
+          let userSub = this.db.object('/users/' + auth.uid).subscribe(
             user => {
               if (user.$exists()) {
-                this.user = user;
-                this.authSub.unsubscribe();
+                //at this point the user has a login and a user profile.
+                //set up this service's user subscrioption and then called
+                // this.initSubject.next(false); to end the initialisation process
+                userSub.unsubscribe();
+                this.userSubject = new BehaviorSubject(user)
+                //this.userSubject is our app wide user Subscription
+                userSub = this.db.object('/users/' + auth.uid).subscribe(
+                  user => this.userSubject.next(user)
+                );
+                this.initSubject.next(false);
               }
               else {
                 this.initSubject.next(auth);
-                console.error('this shouldnt happen? user.$exists() false')
               }
             },
             err => console.error(err),
-            () => {
-              userSub.unsubscribe();
-              this.db.object('/users/' + auth.uid).subscribe(
-                user => {
-                  this.userSubject = new BehaviorSubject(user);
-                  this.initSubject.next(false);
-                }
-              );
-            }
+            () => {}
           )
         }
       },
@@ -54,4 +50,8 @@ export class UserService {
     )
   }
 
+  ngOnDestroy () {
+    debugger;
+    this.authSub.unsubscribe();
+  }
 }

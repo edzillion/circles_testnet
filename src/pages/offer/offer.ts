@@ -29,7 +29,7 @@ export class OfferPage {
   loading: any;
   loading2: any;
 
-  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private _ds: DomSanitizer, private _geo: Geolocation, private _camera: Camera, private ga: GoogleAnalytics, private _loadingCtrl: LoadingController, private _formBuilder: FormBuilder, private _db: AngularFireDatabase, private navParams: NavParams) {
+  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private _ds: DomSanitizer, private _geo: Geolocation, private _camera: Camera, private ga: GoogleAnalytics, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _db: AngularFireDatabase, private navParams: NavParams) {
 
     userService.userSubject.subscribe(
       user => {
@@ -39,7 +39,7 @@ export class OfferPage {
       err => console.error(err)
     );
 
-    this.offerForm = _formBuilder.group({
+    this.offerForm = formBuilder.group({
       picURL: [''],
       title: ['', Validators.required],
       price: ['', Validators.required],
@@ -51,7 +51,7 @@ export class OfferPage {
 
   getCurrentLocation() {
 
-    this.loading2 = this._loadingCtrl.create({
+    this.loading2 = this.loadingCtrl.create({
       content: 'Saving Location ...'
     });
 
@@ -86,7 +86,7 @@ export class OfferPage {
     }
 
     //for form submit
-    this.loading = this._loadingCtrl.create({
+    this.loading = this.loadingCtrl.create({
       content: 'Listing ...'
     });
 
@@ -122,24 +122,18 @@ export class OfferPage {
         uploadTask.then((obj) => {
           offer.picURL = uploadTask.snapshot.downloadURL;
           this.userOffers.push(offer);
-          this.newsService.addNewsItem(offer);
-          let msg = 'Listed ' + offer.title + ' on market';
-          this.notificationsService.create('Listing', msg, 'info');
+          this.newsService.addOfferListed(offer);
           this.offerForm.reset();
           this.loading.dismiss();
-          this.notificationsService.create('Listing Success','','success');
         });
       }
       else {
         //generic profile pic
         offer.picURL = "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgeneric-profile-pic.png?alt=media&token=d151cdb8-115f-483c-b701-e227d52399ef";
         this.userOffers.push(offer);
-        this.newsService.addNewsItem(offer);
-        let msg = 'Listed ' + offer.title + ' on market';
-        this.notificationsService.create('Listing', msg, 'info');
+        this.newsService.addOfferListed(offer);
         this.offerForm.reset();
         this.loading.dismiss();
-        this.notificationsService.create('Listing Success','','success');
       }
     });
   }

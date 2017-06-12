@@ -3,6 +3,8 @@ import { IonicPage, LoadingController } from 'ionic-angular';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+import { UserService } from '../../providers/user-service/user-service';
+
 @IonicPage()
 @Component({
   selector: 'page-login-email',
@@ -14,9 +16,9 @@ export class LoginEmailPage {
   loading: any;
   error: any;
 
-  constructor(private _loadingCtrl: LoadingController, private _formBuilder: FormBuilder, private _afAuth: AngularFireAuth) {
+  constructor(private userService: UserService, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _afAuth: AngularFireAuth) {
 
-    this._loginForm = _formBuilder.group({
+    this._loginForm = formBuilder.group({
       email: ['', Validators.required],
       password: ['', Validators.required]
     });
@@ -26,12 +28,12 @@ export class LoginEmailPage {
     if (!formValid)
       return;
 
-    this.loading = this._loadingCtrl.create({
+    this.loading = this.loadingCtrl.create({
       content: 'Logging In ...'
     });
     this.loading.present()
 
-    this._afAuth.auth.signInWithEmailAndPassword(
+    this.userService.auth.signInWithEmailAndPassword(
       formData.email,
       formData.password
     )

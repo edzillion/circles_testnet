@@ -15,41 +15,41 @@
   </ion-row>
   <ion-row>
     <ion-col>
-      <form [formGroup]="_transactionForm" (ngSubmit)="onSubmit(_transactionForm.value, _transactionForm.valid)">
+      <form [formGroup]="transactionForm" (ngSubmit)="onSubmit(transactionForm.value, transactionForm.valid)">
         <ion-input hidden formControlName="to" type="text"></ion-input>
         <ion-list>
           <ion-list-header>
             Confirm Your Order?
           </ion-list-header>
 
-          <span class="error" *ngIf="_error">{{ error }}</span>
+          <span class="error" *ngIf="error">{{ error }}</span>
 
             <ion-item>
               <ion-label>Item</ion-label>
-              <div item-content>{{this._offer.title}}</div>
+              <div item-content>{{this.offer.title}}</div>
             </ion-item>
 
             <ion-item>
               <ion-row>
                 <ion-col col-8 offset-2>
-                  <img [src]="this._offer.picURL">
+                  <img [src]="this.offer.picURL">
                 </ion-col>
               </ion-row>
             </ion-item>
 
             <ion-item>
               <ion-label>Seller</ion-label>
-              <div item-content>{{this._sellerName}}</div>
+              <div item-content>{{this.offer.sellerName}}</div>
             </ion-item>
 
             <ion-item>
               <ion-label>Price</ion-label>
-              <div item-content>{{this._offer.price}}</div>
+              <div item-content>{{this.offer.price}}</div>
             </ion-item>
 
             <ion-item-divider>
               <button type="button" ion-button color="danger" (click)="closeModal()">CANCEL</button>
-              <button type="button" ion-button style="float:right" [disabled]="!_transactionForm.valid" type="submit">CONFIRM</button>
+              <button type="button" ion-button style="float:right" [disabled]="!transactionForm.valid" type="submit">CONFIRM</button>
             </ion-item-divider>
 
           </ion-list>

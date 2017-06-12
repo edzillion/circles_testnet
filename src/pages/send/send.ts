@@ -30,24 +30,24 @@ export class SendPage {
 
   loading: any;
 
-  constructor(private userService: UserService, private _dataService: DataService, private _transactionService: TransactionService, private notificationsService: NotificationsService, private ga: GoogleAnalytics, private _loadingCtrl: LoadingController, private _formBuilder: FormBuilder, private _db: AngularFireDatabase, private navParams: NavParams) {
+  constructor(private userService: UserService, private _dataService: DataService, private _transactionService: TransactionService, private notificationsService: NotificationsService, private ga: GoogleAnalytics, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _db: AngularFireDatabase, private navParams: NavParams) {
 
     userService.userSubject.subscribe(
       user => this.user = user,
       err => console.error(err),
-      () => {debugger}
+      () => {}
     );
 
     this._searchControl = new FormControl();
 
-    this._sendForm = _formBuilder.group({
+    this._sendForm = formBuilder.group({
       toUserKey: ['',  Validators.required],
       amount: ['', Validators.required],
       message: ['']
     });
 
     //for form submit
-    this.loading = _loadingCtrl.create({
+    this.loading = loadingCtrl.create({
       content: 'Sending ...'
     });
   }
@@ -81,7 +81,7 @@ export class SendPage {
       type: 'transaction'
     };
 
-    if (this._transactionService.createTransactionIntent(this.user.$key, formValues.toUserKey, formValues.amount, formValues.message)) {
+    if (this._transactionService.createTransactionIntent(formValues.toUserKey, formValues.amount, formValues.message)) {
 
       this.notificationsService.create('Send Success','','success');
       let msg = 'Sent ' + formValues.amount + ' Circles to ' + this._toUser.displayName;

@@ -19,7 +19,7 @@ import { UserService } from '../providers/user-service/user-service';
 })
 export class MyApp {
 
-  private rootPage: Component;
+  private rootPage: Component = LoginPage;
   @ViewChild('content') nav;
 
   private userAuth: Observable<firebase.User>;
@@ -43,7 +43,7 @@ export class MyApp {
               this.nav.setRoot(TabsPage, { nav: this.nav });
           },
           err => console.error(err),
-          () => {debugger}
+          () => {}
         )
       });
 
@@ -75,9 +75,11 @@ export class MyApp {
 
 
   logout() {
-    this.afAuth.auth.signOut().then((user) => {
+    //close subscriptions
+
+
+    this.userService.auth.signOut().then((user) => {
       console.log('logout success');
-      //this.sub.unsubscribe();
       this.nav.setRoot(LoginPage);
     }, function(error) {
       console.log('logout fail:', error);

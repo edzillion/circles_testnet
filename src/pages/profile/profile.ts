@@ -49,38 +49,38 @@ export class ProfilePage {
 
   //todo: move literals
   profilePageViewNames: Array<string> = ['Intro', 'User Type', 'User Info', 'Picture', 'Confirm'];
-  weeklyGrant: number = 1000;
+  weeklyGrant: number = 100;
 
-  constructor(private ga: GoogleAnalytics, private _ds: DomSanitizer, private _db: AngularFireDatabase, private _camera: Camera, private _formBuilder: FormBuilder, private _loadingCtrl: LoadingController, private _navCtrl: NavController, private _navParams: NavParams) {
+  constructor(private ga: GoogleAnalytics, private _ds: DomSanitizer, private _db: AngularFireDatabase, private _camera: Camera, private formBuilder: FormBuilder, private loadingCtrl: LoadingController, private _navCtrl: NavController, private _navParams: NavParams) {
 
 
 
-    this._formState.loading = this._loadingCtrl.create({
+    this._formState.loading = this.loadingCtrl.create({
       content: 'Saving Profile ...'
     });
 
-    this.userTypeForm = _formBuilder.group({
+    this.userTypeForm = formBuilder.group({
       type: ['', Validators.required],
     });
 
-    this.individualForm = _formBuilder.group({
+    this.individualForm = formBuilder.group({
       firstName: ['', Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z ]*'), Validators.required])],
       lastName: ['', Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z ]*'), Validators.required])],
       email: ['']
     });
 
-    this.organisationForm = _formBuilder.group({
+    this.organisationForm = formBuilder.group({
       organisation: ['', Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z0-9 ]*'), Validators.required])],
       tagline: ['', Validators.compose([Validators.maxLength(60)])],
       website: [''],
       email: ['']
     });
 
-    this.picForm = _formBuilder.group({
+    this.picForm = formBuilder.group({
       profilePicURL: [''],
     });
 
-    this.confirmForm = _formBuilder.group({
+    this.confirmForm = formBuilder.group({
       confirmed: [false],
     });
 
@@ -185,13 +185,11 @@ export class ProfilePage {
     else
       this.profileSlider.lockSwipeToNext(false);
 
-
   }
 
   onSlideDidChange() {
     //add tracking here
   }
-
 
   selectFromGallery(form) {
     var options = {
@@ -251,7 +249,6 @@ export class ProfilePage {
       this.user.profilePicURL = this.picForm.get('profilePicURL').value;
     }
 
-
     if (!this._formState.refilling) {
       this.user.balance = this.setInitialBalance();
       this.user.createdAt = firebase.database['ServerValue']['TIMESTAMP'];
@@ -266,14 +263,6 @@ export class ProfilePage {
       this.user.balance = this._balance;
       this.user.createdAt = this._createdAt;
     }
-    //todo: add an event to the log here for profile edit
-    // else {
-    //
-    //   this.user.log = [{
-    //     timestamp:this.user.createdAt,
-    //     type:'editProfile'
-    //   }];
-    // }
 
     this._formState.loading.present().then(() => {
 

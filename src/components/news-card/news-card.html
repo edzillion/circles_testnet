@@ -21,6 +21,12 @@
     <span *ngIf="newsItem.type == 'groupJoin'">
       You have successfully joined the group: {{newsItem.title}}
     </span>
+    <span *ngIf="newsItem.type == 'purchase'">
+      You have bought {{newsItem.title}} from {{newsItem.from}}
+    </span>
+    <span *ngIf="newsItem.type == 'sale'">
+      Sold {{newsItem.title}} to {{newsItem.from}} 
+    </span>
   </ion-card-content>
 
 </ion-card>

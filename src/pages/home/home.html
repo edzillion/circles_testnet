@@ -25,10 +25,10 @@
     </ion-row>
   </ion-card>
 
-  <div *ngFor="let newsItems of newsService.allNewsItems | async">
-    <div *ngFor="let newsItem of newsItems">
+  <div *ngFor="let newsItem of newsService.allNewsItemsReversed | async ">
+
       <news-card [newsItem]="newsItem"></news-card>
-    </div>
+
   </div>
   <!-- <news-card></news-card> -->
 

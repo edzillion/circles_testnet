@@ -44,11 +44,10 @@ export class GroupsPage {
 
     this.groups = _db.list('/groups/')
       .map( groups => {
-        //todo: this is all getting called twice, does that make sense?
         for (let group of groups)
           group.state = 'inactive';
-          return groups;
-        }) as FirebaseListObservable<any>;
+        return groups;
+      }) as FirebaseListObservable<any>;
 
     this.allRequirements = _db.list('static/groupRequirements')
   }

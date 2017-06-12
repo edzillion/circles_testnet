@@ -18,13 +18,13 @@ export class SignupEmailPage {
   private _createUserForm: FormGroup;
   loading: any;
 
-  constructor(private _loadingCtrl: LoadingController, private _formBuilder: FormBuilder, private _afAuth: AngularFireAuth) {
+  constructor(private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _afAuth: AngularFireAuth) {
 
-    this.loading = this._loadingCtrl.create({
+    this.loading = this.loadingCtrl.create({
       content: 'Saving User ...'
     });
 
-    this._createUserForm = _formBuilder.group({
+    this._createUserForm = formBuilder.group({
       email: ['', Validators.required],
       password1: ['', Validators.required],
       password2: ['', Validators.required],

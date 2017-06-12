@@ -31,6 +31,7 @@ export class HomePage {
   transactionsSubject: Subject<any>;
 
   constructor(private userService: UserService, private newsService: NewsService, private ga: GoogleAnalytics) {
+
     userService.userSubject.subscribe(
       user => this.user = user,
       err => console.error(err),

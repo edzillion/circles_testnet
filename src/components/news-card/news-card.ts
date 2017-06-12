@@ -19,7 +19,4 @@ export class NewsCard { // implements OnInit{
       () => {}
     )
   }
-  cd(){
-    debugger
-  }
 }

@@ -19,43 +19,37 @@ import { KeyToUserNamePipe } from '../../pipes/key-to-username/key-to-username';
 })
 export class PurchaseModal {
 
-  private _sellerName: string;
-  private _offer: any;
+  private sellerName: string;
+  private offer: any;
 
   private user: any;
-  private _error: any;
+  private error: any;
 
-  private _formState = {
+  private formState = {
     submitAttempt: <boolean>false,
-    loading: <any>{}
   };
 
-  private _transactionForm: FormGroup;
+  private loading: any;
 
-  constructor(private newsService: NewsService, private _keyToUserNamePipe: KeyToUserNamePipe, private userService: UserService, private notificationsService: NotificationsService, private _transactionService: TransactionService, private _formBuilder: FormBuilder, private _loadingCtrl: LoadingController, private _navParams: NavParams, private _viewCtrl: ViewController) {
+  private transactionForm: FormGroup;
+
+  constructor(private newsService: NewsService, private keyToUserNamePipe: KeyToUserNamePipe, private userService: UserService, private notificationsService: NotificationsService, private transactionService: TransactionService, private formBuilder: FormBuilder, private loadingCtrl: LoadingController, private navParams: NavParams, private viewCtrl: ViewController) {
 
     userService.userSubject.subscribe(
-      user => this.user = user.balance,
+      user => this.user = user,
       err => console.error(err),
-      () => {debugger}
+      () => {}
     );
 
-    this._offer = _navParams.get('offer');
-    debugger;
-    _keyToUserNamePipe.transform(this._offer.sellerKey).subscribe( (sellerName) => {
-        this._sellerName = sellerName;
+    this.offer = navParams.get('offer');
+    keyToUserNamePipe.transform(this.offer.seller).subscribe( (sellerName) => {
+        this.offer.sellerName = sellerName;
     });
 
-    //for form submit
-    //todo: really don't need this to be a form
-    this._formState.loading = this._loadingCtrl.create({
-      content: 'Saving Profile ...'
-    });
-
-    this._transactionForm = _formBuilder.group({
+    this.transactionForm = formBuilder.group({
       to: ['', Validators.required]
     });
-    this._transactionForm.patchValue({ to: this._offer.sellerKey });
+    this.transactionForm.patchValue({ to: this.offer.seller });
   }
 
   onSubmit(formValues, formValid) {
@@ -63,28 +57,32 @@ export class PurchaseModal {
     if(!formValid)
       return;
 
-    if(this.user.balance < this._offer.price) {
-      this._error = "Not enough circles";
+    if(this.user.balance < this.offer.price) {
+      this.error = "Not enough circles";
       return;
     }
 
-    //todo: sort out where we want users and where we want keys
-    if (this._transactionService.createPurchaseIntent(this.user.$key, this._offer.sellerKey, this._offer)) {
-      this._offer.timestamp = firebase.database['ServerValue']['TIMESTAMP'];
-      this._offer.type = 'purchase';
-      this.newsService.addNewsItem(this._offer);
-      this.notificationsService.create('Purchase Success','','success');
-      let msg = 'Bought ' + this._offer.title + ' from '+this._sellerName+' for '+this._offer.price+' Circles';
-      this.notificationsService.create('Purchase', msg, 'info');
+    this.loading = this.loadingCtrl.create({
+      content: 'Purchasing ...'
+    });
+
+    this.loading.present();
+
+    let intent = this.transactionService.createPurchaseIntent(this.offer.seller, this.offer);
+    intent.then( res => {
+      this.loading.dismiss();
       this.closeModal();
-    }
-    else {
-      return;
-    }
+    });
+    intent.catch( err => {
+      console.error(err);
+      this.error = err;
+      this.loading.dismiss();
+      this.closeModal();
+    });
   }
 
   closeModal() {
-    this._viewCtrl.dismiss(false);
+    this.viewCtrl.dismiss(false);
   }
 
   ionViewDidLoad() {

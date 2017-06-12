@@ -17,91 +17,94 @@ export class GroupCard {
 
   @Input('group') group: any;
   @Input('requirements') allRequirements: FirebaseListObservable<any>;
-  @Input('height') _contentHeight: number;
-  @Input('user') user: any;
+  @Input('height') contentHeight: number;
 
+  private user: any;
 
-  loading: any;
-  private allRequirementsMet: boolean = false;
+  private loading: any;
+  private allRequirementsMet: boolean = true;
   private groupRequirements: any;
-  private _noConfirm: boolean = false; //set to true if the group contains the requirement.$key 'noconfirm'
-  private _name: string;
-  private _isAMember: boolean = false;
-  private _hasApplied: boolean = false;
+  private noConfirm: boolean = false; //set to true if the group contains the requirement.$key 'noconfirm'
+  private name: string;
+  private isAMember: boolean = false;
+  private hasApplied: boolean = false;
 
   public active: boolean = false;
 
-  private _members: Array<any> = [];
-  private _memberSelected: any;
+  private members: Array<any> = [];
+  private memberSelected: any;
 
   private groupOffers: Array<any> = [];
-  private _offerSelected: any;
+  private offerSelected: any;
   private groupWants: Array<any> = [];
 
-  private _view: string = 'offers';
+  private view: string = 'offers';
 
-  private _headerIcon: string = 'arrow-dropdown';
+  private headerIcon: string = 'arrow-dropdown';
 
-  constructor(private notificationsService: NotificationsService, private newsService: NewsService, private userService: UserService, public modalCtrl: ModalController, private _db: AngularFireDatabase, private _loadingCtrl: LoadingController) {
+  constructor(private notificationsService: NotificationsService, private newsService: NewsService, private userService: UserService, public modalCtrl: ModalController, private db: AngularFireDatabase, private loadingCtrl: LoadingController) {
+
+    userService.userSubject.subscribe(
+      user => this.user = user,
+      err => console.error(err),
+      () => {}
+    );
   }
 
   selectMember(member) {
-    this._memberSelected = member;
+    this.memberSelected = member;
   }
 
   selectOffer(offer) {
-    this._offerSelected = offer;
+    this.offerSelected = offer;
   }
 
   buyOffer() {
-    let circleModal = this.modalCtrl.create(PurchaseModal, { offer: this._offerSelected });
+    let circleModal = this.modalCtrl.create(PurchaseModal, { offer: this.offerSelected });
     circleModal.present().then( (result) => {
-      this._offerSelected = null;
+      this.offerSelected = null;
     });
   }
 
   joinGroup() {
     if (this.allRequirementsMet) {
-      if (this._noConfirm) {
-        this.loading = this._loadingCtrl.create({
+      if (this.noConfirm) {
+        this.loading = this.loadingCtrl.create({
           content: 'Joining group...'
         });
         this.loading.present();
-        this.group.members.push(this.user.key);
-        this._db.object('/groups/' + this.group.$key).update({ members: this.group.members }).then( () => {
-          this.notificationsService.create('Join Success','','success');
+        this.group.members.push(this.user.$key);
+        this.db.object('/groups/' + this.group.$key).update({ members: this.group.members }).then( () => {
           this.newsService.addGroupJoin(this.group);
-          let msg = 'You have joined the group: ' +this.group.displayName;
-          this.notificationsService.create('Join', msg, 'info');
           this.loading.dismiss();
         });
       }
       else {
-        this.loading = this._loadingCtrl.create({
+        this.loading = this.loadingCtrl.create({
           content: 'Applying to join group...',
           duration: 2000
         });
         this.loading.present();
         // application pending code
-        this._hasApplied = true;
+        this.hasApplied = true;
       }
     }
   }
 
   selectedOffers() {
-    this._view = 'offers';
+    this.view = 'offers';
   }
 
   selectedWants() {
-    this._view = 'wants';
+    this.view = 'wants';
   }
 
   toggleShowGroup() {
     this.active = !this.active;
-    this._headerIcon = (this.active) ? 'arrow-dropup' : 'arrow-dropdown';
+    this.headerIcon = (this.active) ? 'arrow-dropup' : 'arrow-dropdown';
   }
 
-  assignRequirementCompletion(requirement: any) {
+  assignRequirementCompletion(requirement: any) : boolean {
     switch (requirement.$key) {
       case "email": {
         requirement.isComplete = (this.user.email != '');
@@ -129,7 +132,7 @@ export class GroupCard {
         break;
       case "review": {
         requirement.isComplete = false;
-        this._noConfirm = false;
+        this.noConfirm = false;
       };
         break;
       case "soundcloud": {
@@ -141,52 +144,49 @@ export class GroupCard {
       };
         break;
     };
-    console.log(requirement.$key, requirement.isComplete)
+    return requirement.isComplete;
   }
 
   ngOnInit() {
-    //first setup group card vars
-    this._name = this.group.displayName;
 
-    //todo: seems inefficient
+    this.name = this.group.displayName;
+
     this.group.members.map(member => {
-      this._db.object('/users/' + member).take(1).subscribe( (member) => {
-        if (member.$exists()) {
-            this._members.push(member);
+      this.db.object('/users/' + member).take(1).subscribe(
+        member => {
+          if (member.$exists()) {
+            this.members.push(member);
             if (member.offers) {
               for (let i in member.offers) {
-                //todo: do this better
-                member.offers[i].sellerKey = member.$key;
+                member.offers[i].seller = member.$key;
                 this.groupOffers.push(member.offers[i]);
               }
             }
-        }
-        else
-          console.error('member missing in DB, key:', member.$key);
-      })
+          }
+          else {
+            console.error('member missing in DB, key:', member.$key);
+          }
+        },
+        err => console.error('firebase error:', err),
+        () => {}
+      )
     });
 
-    //user.$key is equivalent to user.uid
-    this._isAMember = this.group.members.includes(this.user.$key);
+    this.isAMember = this.group.members.includes(this.user.$key);
 
-    this.groupRequirements = this.allRequirements.map(reqs =>
-      reqs.filter(req => {
+    this.groupRequirements = this.allRequirements.map( reqs =>
+      reqs.filter( req => {
         if (req.$key == 'noconfirm') {
-          this._noConfirm = true;
+          this.noConfirm = true;
           return false;
         }
-        if (this.group.requirements.includes(req.$key)) {
-          this.assignRequirementCompletion(req);
+        else if (this.group.requirements.includes(req.$key)) {
+          //if one is not completed then all req's not met
+          if (!this.assignRequirementCompletion(req))
+            this.allRequirementsMet = false;
           return this.group.requirements.includes(req.$key);
         }
         return false;
       }));
-
-    this.groupRequirements
-      .map(reqs => reqs.every((req) => req.isComplete))
-      .subscribe(result => {
-        this.allRequirementsMet = result;
-      });
   }
-
 }

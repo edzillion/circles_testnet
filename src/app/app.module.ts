@@ -1,6 +1,7 @@
 
 //core
 import { NgModule, ErrorHandler } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { BrowserModule } from '@angular/platform-browser';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 
@@ -41,7 +42,7 @@ import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
 import { SimpleNotificationsModule } from 'angular2-notifications';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { TagInputModule } from 'ng2-tag-input';
 
 //configs
 import { environment } from '../environments/environment';
@@ -51,6 +52,7 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
 import { KeyToUserPipe } from '../pipes/key-to-user/key-to-user';
 import { KeyToUserNamePipe } from '../pipes/key-to-username/key-to-username';
 import { TimeAgoPipe } from 'time-ago-pipe';
+import { ReverseOrderPipe } from '../pipes/reverse-order/reverse-order';
 
 
 @NgModule({
@@ -70,11 +72,13 @@ import { TimeAgoPipe } from 'time-ago-pipe';
     PurchaseModal,
     KeyToUserPipe,
     KeyToUserNamePipe,
-    TimeAgoPipe
+    TimeAgoPipe,
+    ReverseOrderPipe
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    TagInputModule,
     SimpleNotificationsModule.forRoot(),
     SuperTabsModule.forRoot(),
     IonicModule.forRoot(MyApp),
@@ -109,6 +113,7 @@ import { TimeAgoPipe } from 'time-ago-pipe';
     KeyToUserPipe,
     KeyToUserNamePipe,
     TimeAgoPipe,
+    ReverseOrderPipe,
     DataService,
     UserService
   ]

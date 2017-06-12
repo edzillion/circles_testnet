@@ -23,16 +23,17 @@ export class NewsService {
 
   private user: any;
 
-  private _dbNewsItems: FirebaseListObservable<any>;
-  private _newsItems: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
+  private dbNewsItems: FirebaseListObservable<any>;
+  private newsItemsReversed: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
+  private newsItems: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
 
-  constructor(private userService: UserService, private notificationsService: NotificationsService, private _db: AngularFireDatabase, private _keyToUserPipe: KeyToUserPipe) {
+  constructor(private userService: UserService, private notificationsService: NotificationsService, private db: AngularFireDatabase, private keyToUserPipe: KeyToUserPipe) {
 
     //this needs to make sure we have the user key so we will instead get the Observable and sub to that
     userService.userSubject.subscribe(
       user => {
         this.user = user;
-        this.setupDBQuery(user);
+        this.setupDBQuery(user); //todo: maybe this should not be called every time the user changes
       },
       err => console.error(err),
       () => {}
@@ -41,78 +42,105 @@ export class NewsService {
 
   setupDBQuery(user) {
 
-    this._dbNewsItems = this._db.list('/users/' + user.$key + '/log/');
+    this.dbNewsItems = this.db.list('/users/' + user.$key + '/log/');
     let twoMinsAgo = Date.now() - 120000;
-    this._dbNewsItems.$ref
+    this.dbNewsItems.$ref.off();
+    this.dbNewsItems.$ref
       .orderByChild('timestamp')
       .startAt(twoMinsAgo)
-      .on('child_added', (firebaseObj) => {
+      .on('child_added', (firebaseObj,index) => {
         let latestNewsItem = firebaseObj.val();
-
+        debugger;
         //receiving from someone
         if (latestNewsItem.type == 'transaction' && latestNewsItem.to == user.$key) {
-          this._keyToUserPipe.transform(latestNewsItem.from).subscribe((fromUser) => {
+          this.keyToUserPipe.transform(latestNewsItem.from).subscribe((fromUser) => {
             let msg = 'Receieved ' + latestNewsItem.amount + ' Circles from ' + fromUser.displayName;
             this.notificationsService.create('Transaction', msg, 'info');
           });
         }
+        else if (latestNewsItem.type == 'sale') {
+          this.keyToUserPipe.transform(latestNewsItem.from).subscribe((fromUser) => {
+            let msg = fromUser.displayName+' has just bought ' + latestNewsItem.title + ' for '+latestNewsItem.amount+' Circles';
+            this.notificationsService.create('Sale', msg, 'info');
+          });
+        }
       });
-          //sending to someone else
-      //     if (latestNewsItem.to != user.key) {
-      //       this._keyToUserPipe.transform(latestNewsItem.to).subscribe((toUser) => {
-      //         let msg = 'Sent ' + latestNewsItem.amount + ' Circles to ' + toUser.displayName;
-      //         this.notificationsService.create('Transaction', msg, 'info');
-      //       });
-      //     }
-      //     else { //receiving from someone
-      //       this._keyToUserPipe.transform(latestNewsItem.from).subscribe((fromUser) => {
-      //         let msg = 'Receieved ' + latestNewsItem.amount + ' Circles from ' + fromUser.displayName;
-      //         this.notificationsService.create('Transaction', msg, 'info');
-      //       });
-      //     }
-      //   }
-      //   else if (latestNewsItem.type == 'offerListed') {
-      //     let msg = 'Listed ' + latestNewsItem.title + ' on market';
-      //     this.notificationsService.create('Listing', msg, 'info');
-      //   }
-      //   else if (latestNewsItem.type == 'purchase') {
-      //     let msg = 'Bought ' + latestNewsItem.title + ' from '+latestNewsItem.seller+' for '+latestNewsItem.price+' Circles';
-      //     this.notificationsService.create('Purchase', msg, 'info');
-      //   }
-      //   else if (latestNewsItem.type == 'groupJoin') {
-      //     let msg = 'You have joined the group: ' +latestNewsItem.title;
-      //     this.notificationsService.create('Join', msg, 'info');
-      //   }
-      // });
 
-    this._newsItems = Observable.combineLatest(this._dbNewsItems) as BehaviorSubject<any>;
+      this.dbNewsItems.subscribe( (newsitems) => {
+       let r = newsitems.sort((a,b) => a.timestamp < b.timestamp ? 1 : -1);
+       this.newsItemsReversed.next(r)
+      });
 
+      this.dbNewsItems.subscribe(this.newsItems);
+
+     //= Observable.combineLatest(this.dbNewsItems) as BehaviorSubject<any>;
   }
 
-  public get allNewsItems(): Observable<any> {
-    return this._newsItems;
+  public get allNewsItems(): BehaviorSubject<any> {
+    return this.newsItems;
   }
 
-  public addNewsItem(newsItem) {
-    this._dbNewsItems.push(newsItem);
+  public get allNewsItemsReversed(): BehaviorSubject<any> {
+    return this.newsItemsReversed;
   }
 
-  public addPurchase(newsItem) {
-    this._dbNewsItems.push(newsItem);
+  public addTransaction(txItem) {
+    //this will only be called for sending to someone else
+    this.notificationsService.create('Transfer Success','','success');
+    let msg = 'Sent ' + txItem.amount + ' Circles to ' + txItem.title;
+    this.notificationsService.create('Transaction', msg, 'info');
+
+    let newsItem = {
+      timestamp: firebase.database['ServerValue']['TIMESTAMP'],
+      amount: txItem.amount,
+      to: txItem.to,
+      type: 'transaction'
+    };
+    this.dbNewsItems.push(newsItem);
   }
 
-  public addOffer(offerItem) {
-    offerItem.type = 'offerListed';
-    this._dbNewsItems.push(offerItem);
+  public addPurchase(offer) {
+    this.notificationsService.create('Purchase Success','','success');
+    let msg = 'Bought ' + offer.title + ' from '+offer.sellerName+' for '+offer.price+' Circles';
+    this.notificationsService.create('Purchase', msg, 'info');
+
+    let newsItem = {
+      timestamp: firebase.database['ServerValue']['TIMESTAMP'],
+      title: offer.title,
+      from: offer.seller,
+      type: 'purchase'
+    };
+    this.dbNewsItems.push(newsItem);
+  }
+
+  public addOfferListed(offer) {
+    this.notificationsService.create('Listing Success','','success');
+    let msg = 'Listed ' + offer.title + ' on market';
+    this.notificationsService.create('Listing', msg, 'info');
+
+    let newsItem = {
+      timestamp: firebase.database['ServerValue']['TIMESTAMP'],
+      title: offer.title,
+      type: 'offerListed'
+    };
+    this.dbNewsItems.push(newsItem);
   }
 
   public addGroupJoin(group) {
+    this.notificationsService.create('Join Success','','success');
+    let msg = 'You have joined the group: ' +group.displayName;
+    this.notificationsService.create('Join', msg, 'info');
+
     let newsItem = {
       timestamp: firebase.database['ServerValue']['TIMESTAMP'],
       title: group.displayName,
       type: 'groupJoin'
     };
-    this._dbNewsItems.push(newsItem);
+    this.dbNewsItems.push(newsItem);
   };
+
+  ngOnDestroy() {
+    debugger;
+  }
 
 }
