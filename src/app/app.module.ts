@@ -9,6 +9,7 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 import { Camera } from '@ionic-native/camera';
 import { Geolocation } from '@ionic-native/geolocation';
+import { Push } from '@ionic-native/push';
 
 //app
 import { MyApp } from './app.component';
@@ -104,6 +105,7 @@ import { ReverseOrderPipe } from '../pipes/reverse-order/reverse-order';
     TransactionService,
     Camera,
     Geolocation,
+    Push,
     StatusBar,
     SplashScreen,
     GoogleAnalytics,

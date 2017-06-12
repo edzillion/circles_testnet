@@ -1,11 +1,10 @@
 import { Injectable, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs';
-
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { Push, PushObject, PushOptions } from '@ionic-native/push';
 
 import { KeyToUserPipe } from '../../pipes/key-to-user/key-to-user';
-
 import { NotificationsService } from 'angular2-notifications';
 import { UserService } from '../../providers/user-service/user-service';
 
@@ -16,41 +15,71 @@ import 'rxjs/add/operator/combineLatest';
 
 import { Subscription } from 'rxjs/Subscription';
 
+import { environment } from '../../environments/environment';
+
+
 @Injectable()
 export class NewsService {
 
   private userSub: Subscription;
-
+  //private pushToken: PushToken;
   private user: any;
 
   private dbNewsItems: FirebaseListObservable<any>;
   private newsItemsReversed: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
   private newsItems: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
 
-  constructor(private userService: UserService, private notificationsService: NotificationsService, private db: AngularFireDatabase, private keyToUserPipe: KeyToUserPipe) {
+  constructor(private push: Push, private userService: UserService, private notificationsService: NotificationsService, private db: AngularFireDatabase, private keyToUserPipe: KeyToUserPipe) {
 
     //this needs to make sure we have the user key so we will instead get the Observable and sub to that
-    userService.userSubject.subscribe(
+    userService.userSubject.take(1).subscribe(
       user => {
         this.user = user;
-        this.setupDBQuery(user); //todo: maybe this should not be called every time the user changes
+        this.registerPushNotifs();
+        this.setupDBQuery(user);
       },
       err => console.error(err),
       () => {}
     );
   }
 
+  registerPushNotifs() {
+
+    const options: PushOptions = {
+     android: {
+         senderID: environment.cloudSettings.push.sender_id
+     },
+     ios: {
+         alert: 'true',
+         badge: true,
+         sound: 'false'
+     },
+     windows: {}
+   };
+
+   const pushObject: PushObject = this.push.init(options);
+
+   pushObject.on('notification').subscribe(
+     (notification: any) => console.log('Received a notification', notification));
+
+   pushObject.on('registration').subscribe(
+     (registration: any) => console.log('Device registered', registration));
+
+   pushObject.on('error').subscribe(
+     error => console.error('Error with Push plugin', error));
+
+
+  }
+
   setupDBQuery(user) {
 
     this.dbNewsItems = this.db.list('/users/' + user.$key + '/log/');
     let twoMinsAgo = Date.now() - 120000;
-    this.dbNewsItems.$ref.off();
     this.dbNewsItems.$ref
       .orderByChild('timestamp')
       .startAt(twoMinsAgo)
       .on('child_added', (firebaseObj,index) => {
         let latestNewsItem = firebaseObj.val();
-        debugger;
         //receiving from someone
         if (latestNewsItem.type == 'transaction' && latestNewsItem.to == user.$key) {
           this.keyToUserPipe.transform(latestNewsItem.from).subscribe((fromUser) => {

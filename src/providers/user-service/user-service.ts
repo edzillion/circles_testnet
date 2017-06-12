@@ -13,8 +13,11 @@ export class UserService {
 
   public userSubject: BehaviorSubject<any>;
   public initSubject: ReplaySubject<any> = new ReplaySubject<any>(1);
+
   public authSub: Subscription;
   public auth: any;
+
+  private user: any;
 
   constructor(public afAuth: AngularFireAuth, private db: AngularFireDatabase, @Inject( APP_CONFIG ) private config: IAppConfig) {
 
@@ -25,8 +28,9 @@ export class UserService {
           let userSub = this.db.object('/users/' + auth.uid).subscribe(
             user => {
               if (user.$exists()) {
-                //at this point the user has a login and a user profile.
-                //set up this service's user subscrioption and then called
+                this.user = user;
+                // at this point the user has a login and a user profile.
+                // set up this service's user subscrioption and then called
                 // this.initSubject.next(false); to end the initialisation process
                 userSub.unsubscribe();
                 this.userSubject = new BehaviorSubject(user)
@@ -48,6 +52,10 @@ export class UserService {
       err => console.error(err),
       () => {}
     )
+  }
+
+  save(user) {
+    this.user.set(user);
   }
 
   ngOnDestroy () {
