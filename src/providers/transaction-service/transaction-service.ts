@@ -90,7 +90,8 @@ export class TransactionService {
       this.userService.keyToUser(toUserId).subscribe( (toUser) => {
         if(this.transfer(toUser, amount)) {
           let offerObj = {
-            amount:amount,
+            amount: amount,
+            price: amount,
             title:'Transaction',
             to: toUserId,
             toUser: toUser

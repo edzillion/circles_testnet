@@ -38,7 +38,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 //vendor
-//import { SuperTabsModule } from 'ionic2-super-tabs';
+import { SuperTabsModule } from 'ionic2-super-tabs';
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
@@ -60,7 +60,7 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
     BrowserAnimationsModule,
     TagInputModule,
     SimpleNotificationsModule.forRoot(),
-    //SuperTabsModule.forRoot(),
+    SuperTabsModule.forRoot(),
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,

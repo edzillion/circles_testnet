@@ -4,7 +4,7 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import { FormBuilder, FormGroup, FormControl, Validators, } from '@angular/forms';
 
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
-import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
+import { NotificationsService } from 'angular2-notifications';
 import { TransactionService } from '../../providers/transaction-service/transaction-service';
 import { DataService } from '../../providers/data-service/data-service';
 import { UserService } from '../../providers/user-service/user-service';
@@ -25,8 +25,6 @@ export class SendPage {
   private sendForm: FormGroup;
   private toUser: any;
   private user: any;
-
-  private error: string;
 
   loading: any;
 
@@ -83,30 +81,19 @@ export class SendPage {
       this.notificationsService.create('Balance', msg, 'warn');
       return;
     }
+    
     this.loading.present();
 
-    let transaction = {
-      amount: <number>formValues.amount,
-      to: formValues.toUserKey,
-      from: this.user.$key,
-      message: formValues.message,
-      type: 'transaction'
-    };
-
     if (this.transactionService.createTransactionIntent(formValues.toUserKey, formValues.amount, formValues.message)) {
-
-      this.notificationsService.create('Send Success','','success');
-      let msg = 'Sent ' + formValues.amount + ' Circles to ' + this.toUser.displayName;
-      this.notificationsService.create('Transaction', msg, 'info');
+      //reset the recipient field
+      this.toUser = null;
+      this.sendForm.reset();
+      this.loading.dismiss();
+      return;
     }
     else {
       return;
     }
-
-    //reset the recipient field
-    this.toUser = null;
-    this.sendForm.reset();
-    this.loading.dismiss();
 
   }
 
