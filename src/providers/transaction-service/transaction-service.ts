@@ -69,7 +69,7 @@ export class TransactionService {
     toUserLog.push(logItem);
   }
 
-  createPurchaseIntent(sellerUserId, offer): Promise<boolean> {
+  createPurchaseIntent(sellerUserId, offer) {
     let p = new Promise( (resolve, reject) => {
       this.userService.keyToUser(sellerUserId).subscribe( (sellerUser) => {
         if (this.transfer(sellerUser, offer.price)) {
@@ -85,7 +85,7 @@ export class TransactionService {
     return p;
   }
 
-  createTransactionIntent(toUserId:string, amount:number, message?:string): Promise<boolean> {
+  createTransactionIntent(toUserId:string, amount:number, message?:string) {
     let p = new Promise( (resolve, reject) => {
       this.userService.keyToUser(toUserId).subscribe( (toUser) => {
         if(this.transfer(toUser, amount)) {

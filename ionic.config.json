@@ -1,5 +1,8 @@
 {
   "name": "circles_testnet",
   "app_id": "742b9e39",
-  "type": "ionic-angular"
+  "type": "ionic-angular",
+  "watchPatterns": [
+    "scss/**/*"
+  ]
 }

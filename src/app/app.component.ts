@@ -18,7 +18,7 @@ import { environment } from '../environments/environment';
 })
 export class MyApp {
 
-  private rootPage: Component = LoginPage;
+  private rootPage =  LoginPage;
   @ViewChild('content') nav;
 
   private loading: any;
@@ -54,7 +54,7 @@ export class MyApp {
         statusBar.styleDefault();
         this.userService.initSubject.subscribe(
           noProfile => {
-            
+
             if (noProfile)
               this.nav.setRoot(ProfilePage, { user: noProfile, nav: this.nav });
             else
