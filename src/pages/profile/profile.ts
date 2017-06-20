@@ -7,9 +7,6 @@ import { IonicPage, NavController, NavParams, Slides, LoadingController } from '
 import { Camera } from '@ionic-native/camera';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 
-import { Observable, Subscription } from 'rxjs';
-
-import { LoginPage } from '../login/login';
 import { TabsPage } from '../tabs/tabs';
 
 import { AngularFireDatabase } from 'angularfire2/database';
@@ -22,13 +19,11 @@ import * as firebase from 'firebase';
 })
 export class ProfilePage {
 
-  authSubscription: Subscription;
-
   private user: any;
-  private _balance: any;
-  private _createdAt: any;
-  private _UID: string;
-  private _base64ImageData: string;
+  private balance: any;
+  private createdAt: any;
+  private UID: string;
+  private base64ImageData: string;
 
   @ViewChild(Slides) profileSlider: Slides;
 
@@ -39,7 +34,7 @@ export class ProfilePage {
   picForm: FormGroup;
   confirmForm: FormGroup;
 
-  private _formState = {
+  private formState = {
     type: <string>null,
     submitAttempt: <boolean>false,
     profilePicRequired: <boolean>false,
@@ -51,11 +46,18 @@ export class ProfilePage {
   profilePageViewNames: Array<string> = ['Intro', 'User Type', 'User Info', 'Picture', 'Confirm'];
   weeklyGrant: number = 100;
 
-  constructor(private ga: GoogleAnalytics, private _ds: DomSanitizer, private _db: AngularFireDatabase, private _camera: Camera, private formBuilder: FormBuilder, private loadingCtrl: LoadingController, private _navCtrl: NavController, private _navParams: NavParams) {
+  constructor(
+    private ga: GoogleAnalytics,
+    private ds: DomSanitizer,
+    private db: AngularFireDatabase,
+    private camera: Camera,
+    private formBuilder: FormBuilder,
+    private loadingCtrl: LoadingController,
+    private navCtrl: NavController,
+    private navParams: NavParams
+  ) {
 
-
-
-    this._formState.loading = this.loadingCtrl.create({
+    this.formState.loading = this.loadingCtrl.create({
       content: 'Saving Profile ...'
     });
 
@@ -87,21 +89,21 @@ export class ProfilePage {
     // Missing array elems are added based on setUserTypeSlides()
     this.formGroups = [null, this.userTypeForm, null, null, this.confirmForm];
 
-    this.user = _navParams.get('user');
+    this.user = navParams.get('user');
     if (this.user.uid) { //firebase user
-      this._formState.refilling = false;
-      this._UID =  this.user.uid;
+      this.formState.refilling = false;
+      this.UID =  this.user.uid;
       this.initialiseFormFields(this.user);
     }
     else { //user object, therfore we are refilling out profile form
-      this._formState.refilling = true;
-      this.user.subscribe( (user) => {
-        this._UID =  user.$key;
-        this.user = user;
-        this._balance = user.balance;
-        this._createdAt = user.createdAt;
+      this.formState.refilling = true;
+      //this.user.subscribe( (user) => {
+        this.UID =  this.user.$key;
+        this.user = this.user;
+        this.balance = this.user.balance;
+        this.createdAt = this.user.createdAt;
         this.initialiseFormFields(this.user);
-      });
+      //});
     }
   }
 
@@ -158,19 +160,19 @@ export class ProfilePage {
 
   setUserTypeSlides() {
 
-    this._formState.type = this.userTypeForm.controls.type.value;
+    this.formState.type = this.userTypeForm.controls.type.value;
 
     //we have the user type so build the formgroup array to fit the form path
-    if (this._formState.type == 'individual') {
+    if (this.formState.type == 'individual') {
       this.formGroups[2] = this.individualForm;
       //todo: fix this bug. setValidators is not setting the formControl valid = false
       this.picForm.controls.profilePicURL.setValidators([Validators.required, Validators.minLength(24)]);
-      this._formState.profilePicRequired = true;
+      this.formState.profilePicRequired = true;
     }
     else {
       this.formGroups[2] = this.organisationForm;
       this.picForm.controls.profilePicURL.clearValidators();
-      this._formState.profilePicRequired = false;
+      this.formState.profilePicRequired = false;
     }
     this.formGroups[3] = this.picForm;
   }
@@ -193,12 +195,12 @@ export class ProfilePage {
 
   selectFromGallery(form) {
     var options = {
-      sourceType: this._camera.PictureSourceType.PHOTOLIBRARY,
-      destinationType: this._camera.DestinationType.DATA_URL
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
+      destinationType: this.camera.DestinationType.DATA_URL
     };
-    this._camera.getPicture(options).then((imageData) => {
+    this.camera.getPicture(options).then((imageData) => {
       // imageData is a base64 encoded string
-      this._base64ImageData = imageData;
+      this.base64ImageData = imageData;
       form.patchValue({ profilePicURL: "data:image/jpeg;base64," + imageData });
       form.controls.profilePicURL.markAsDirty();
     }, (err) => {
@@ -208,12 +210,12 @@ export class ProfilePage {
 
   openCamera(form) {
     var options = {
-      sourceType: this._camera.PictureSourceType.CAMERA,
-      destinationType: this._camera.DestinationType.DATA_URL
+      sourceType: this.camera.PictureSourceType.CAMERA,
+      destinationType: this.camera.DestinationType.DATA_URL
     };
-    this._camera.getPicture(options).then((imageData) => {
+    this.camera.getPicture(options).then((imageData) => {
       // imageData is a base64 encoded string
-      this._base64ImageData = imageData;
+      this.base64ImageData = imageData;
       form.patchValue({ profilePicURL: "data:image/jpeg;base64," + imageData });
       form.controls.profilePicURL.markAsDirty();
     }, (err) => {
@@ -231,7 +233,7 @@ export class ProfilePage {
 
   saveForm() {
     this.user = {};
-    this.user.type = this._formState.type;
+    this.user.type = this.formState.type;
 
     if (this.user.type === 'individual') {
       this.user.firstName = this.individualForm.get('firstName').value;
@@ -249,7 +251,7 @@ export class ProfilePage {
       this.user.profilePicURL = this.picForm.get('profilePicURL').value;
     }
 
-    if (!this._formState.refilling) {
+    if (!this.formState.refilling) {
       this.user.balance = this.setInitialBalance();
       this.user.createdAt = firebase.database['ServerValue']['TIMESTAMP'];
 
@@ -260,15 +262,15 @@ export class ProfilePage {
     }
     else {
       //todo: hacky
-      this.user.balance = this._balance;
-      this.user.createdAt = this._createdAt;
+      this.user.balance = this.balance;
+      this.user.createdAt = this.createdAt;
     }
 
-    this._formState.loading.present().then(() => {
+    this.formState.loading.present().then(() => {
 
-      if (this._base64ImageData) {
+      if (this.base64ImageData) {
 
-        let uploadTask = firebase.storage().ref('/profilepics').child(this._UID).putString(this._base64ImageData, 'base64', { contentType: 'image/jpg' });
+        let uploadTask = firebase.storage().ref('/profilepics').child(this.UID).putString(this.base64ImageData, 'base64', { contentType: 'image/jpg' });
 
         uploadTask.on(
           firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
@@ -296,13 +298,13 @@ export class ProfilePage {
         uploadTask.then((obj) => {
           this.user.profilePicURL = uploadTask.snapshot.downloadURL;
 
-          this._db.object(`users/${this._UID}`).set(this.user)
+          this.db.object(`users/${this.UID}`).set(this.user)
             .then((success) => {
 
               console.log('userData save success');
-              this._formState.loading.dismiss();
-              if (this._formState.refilling)
-                this._navCtrl.setRoot(TabsPage);
+              this.formState.loading.dismiss();
+              if (this.formState.refilling)
+                this.navCtrl.setRoot(TabsPage);
               //we don't need to navigate here since our subscription to the user record will fire in app.component
               //this.navCtrl.setRoot(TabsPage, { user: this.user });
             })
@@ -311,16 +313,16 @@ export class ProfilePage {
       }
       else {
         //generic profile pic
-        if (!this._formState.refilling) {
+        if (!this.formState.refilling) {
           this.user.profilePicURL = "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgeneric-profile-pic.png?alt=media&token=d151cdb8-115f-483c-b701-e227d52399ef";
         }
-        this._db.object(`users/${this._UID}`).set(this.user)
+        this.db.object(`users/${this.UID}`).set(this.user)
           .then((success) => {
             console.log('userData save success');
-            this._formState.loading.dismiss();
+            this.formState.loading.dismiss();
 
-            if (this._formState.refilling)
-              this._navCtrl.setRoot(TabsPage);
+            if (this.formState.refilling)
+              this.navCtrl.setRoot(TabsPage);
             //we don't need to navigate here since our subscription to the user record will fire in app.component
             //this.navCtrl.setRoot(TabsPage, { user: this.user });
           })

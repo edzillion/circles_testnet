@@ -1,6 +1,6 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>{{_pageTitle}}</ion-title>
+    <ion-title>Circles - {{pageTitle}}</ion-title>
     <ion-buttons left>
       <button ion-button menuToggle icon-only >
         <ion-icon name="menu"></ion-icon>
@@ -9,8 +9,9 @@
     <ion-buttons right>
       <button ion-button icon-only>
         <ion-icon name="cash"></ion-icon>
+        <div class="title title-md">{{user.balance}}</div>
       </button>
-      <ion-title>{{userService.balance}}</ion-title>
+
     </ion-buttons>
   </ion-navbar>
 </ion-header>

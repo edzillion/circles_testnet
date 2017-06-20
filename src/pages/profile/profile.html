@@ -38,7 +38,7 @@
       <ion-row>
         <ion-col col-8 offset-2>
           <div class="slide-heading">
-            Are you a individual or organisation?
+            Are you an individual or organisation?
           </div>
         </ion-col>
       </ion-row>
@@ -47,7 +47,7 @@
           <form [formGroup]="userTypeForm">
             <ion-list radio-group>
               <ion-list-header>
-                What type of user are you? {{_formState.type}}
+                What type of user are you? {{formState.type}}
               </ion-list-header>
 
               <ion-list radio-group formControlName="type">
@@ -70,7 +70,7 @@
 
 
     <ion-slide>
-      <div *ngIf="_formState.type == 'individual'">
+      <div *ngIf="formState.type == 'individual'">
         <ion-row>
           <ion-col col-8 offset-2>
             <div class="slide-heading">
@@ -87,7 +87,7 @@
                   <ion-label>First Name</ion-label>
                   <ion-input formControlName="firstName" type="text"></ion-input>
                 </ion-item>
-                <div *ngIf="_formState.submitAttempt">
+                <div *ngIf="formState.submitAttempt">
                   <div *ngIf="individualForm.controls.firstName.dirty && !individualForm.controls.firstName.valid" class="alert alert-danger">
                     Letters only please!
                   </div>
@@ -99,7 +99,7 @@
                   <ion-label>Last Name</ion-label>
                   <ion-input formControlName="lastName" type="text"></ion-input>
                 </ion-item>
-                <div *ngIf="_formState.submitAttempt">
+                <div *ngIf="formState.submitAttempt">
                   <div *ngIf="individualForm.controls.lastName.dirty && !individualForm.controls.lastName.valid" class="alert alert-danger">
                     Letters only please!
                   </div>
@@ -123,7 +123,7 @@
           </ion-col>
         </ion-row>
       </div>
-      <div *ngIf="_formState.type == 'organisation'">
+      <div *ngIf="formState.type == 'organisation'">
         <ion-row>
           <ion-col col-8 offset-2>
             <div class="slide-heading">
@@ -171,10 +171,10 @@
       <ion-row>
         <ion-col col-8 offset-2>
           <div class="slide-heading">
-            <div *ngIf="_formState.type == 'individual'">
+            <div *ngIf="formState.type == 'individual'">
               Please submit a photo of your face
             </div>
-            <div *ngIf="_formState.type == 'organisation'">
+            <div *ngIf="formState.type == 'organisation'">
               Optionally submit a picture of your logo
             </div>
           </div>
@@ -183,9 +183,9 @@
       <form [formGroup]="picForm" (ngSubmit)="onSubmit(picForm.value, picForm.valid)">
         <ion-row>
           <ion-col col-6 offset-3>
-            <ion-input [required]="_formState.profilePicRequired" hidden formControlName="profilePicURL" type="text"></ion-input>
+            <ion-input [required]="formState.profilePicRequired" hidden formControlName="profilePicURL" type="text"></ion-input>
             <img class="profile-pic" src="https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgeneric-profile-pic.png?alt=media&token=d151cdb8-115f-483c-b701-e227d52399ef" *ngIf="picForm.controls.profilePicURL.pristine">
-            <img class="profile-pic" [src]="_ds.bypassSecurityTrustUrl(picForm.controls.profilePicURL.value)" *ngIf="picForm.controls.profilePicURL.valid && picForm.controls.profilePicURL.dirty">
+            <img class="profile-pic" [src]="ds.bypassSecurityTrustUrl(picForm.controls.profilePicURL.value)" *ngIf="picForm.controls.profilePicURL.valid && picForm.controls.profilePicURL.dirty">
           </ion-col>
         </ion-row>
         <ion-row>
@@ -210,7 +210,7 @@
       <form [formGroup]="confirmForm" (ngSubmit)="saveForm(confirmForm.value, confirmForm.valid)">
         <ion-row>
           <ion-col col-8>
-            <div *ngIf="_formState.type == 'individual'">
+            <div *ngIf="formState.type == 'individual'">
 
               <ion-list>
                 <ion-item>
@@ -228,7 +228,7 @@
               </ion-list>
 
             </div>
-            <div *ngIf="_formState.type == 'organisation'">
+            <div *ngIf="formState.type == 'organisation'">
 
               <ion-list>
                 <ion-item>

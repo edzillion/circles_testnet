@@ -34,7 +34,7 @@ export class GroupsPage {
 
   contentHeight: number;
 
-  constructor(private userService: UserService, private _db: AngularFireDatabase, public navCtrl: NavController, public navParams: NavParams) {
+  constructor(private userService: UserService, private db: AngularFireDatabase, public navCtrl: NavController, public navParams: NavParams) {
 
     userService.userSubject.subscribe(
       user => this.user = user,
@@ -42,18 +42,14 @@ export class GroupsPage {
       () => {}
     );
 
-    this.groups = _db.list('/groups/')
+    this.groups = db.list('/groups/')
       .map( groups => {
         for (let group of groups)
           group.state = 'inactive';
         return groups;
       }) as FirebaseListObservable<any>;
 
-    this.allRequirements = _db.list('static/groupRequirements')
-  }
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad GroupsPage');
+    this.allRequirements = db.list('static/groupRequirements')
   }
 
   enterGroup(group,elementIndex) {
@@ -65,6 +61,10 @@ export class GroupsPage {
   scrollToElem(elementId:string) {
     let yOffset = document.getElementById(elementId).offsetTop;
     this.content.scrollTo(0, yOffset, 500);
+  }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad GroupsPage');
   }
 
 }

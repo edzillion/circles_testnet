@@ -6,7 +6,7 @@ import 'rxjs/add/operator/map';
 
 @Pipe({
   name: 'keytousername',
-  pure: true
+  pure: false
 })
 export class KeyToUserNamePipe implements PipeTransform {
 

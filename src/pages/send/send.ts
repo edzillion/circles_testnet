@@ -4,7 +4,7 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import { FormBuilder, FormGroup, FormControl, Validators, } from '@angular/forms';
 
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
-import { NotificationsService } from 'angular2-notifications';
+import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
 import { TransactionService } from '../../providers/transaction-service/transaction-service';
 import { DataService } from '../../providers/data-service/data-service';
 import { UserService } from '../../providers/user-service/user-service';
@@ -18,19 +18,29 @@ import 'rxjs/add/operator/debounceTime';
 })
 export class SendPage {
 
-  private _searchTerm: string = '';
-  private _searchUsers: any;
-  private _searchControl: FormControl;
+  private searchTerm: string = '';
+  private searchUsers: any;
+  private searchControl: FormControl;
 
-  private _sendForm: FormGroup;
-  private _toUser: any;
+  private sendForm: FormGroup;
+  private toUser: any;
   private user: any;
 
-  private _error: string;
+  private error: string;
 
   loading: any;
 
-  constructor(private userService: UserService, private _dataService: DataService, private _transactionService: TransactionService, private notificationsService: NotificationsService, private ga: GoogleAnalytics, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _db: AngularFireDatabase, private navParams: NavParams) {
+  constructor(
+    private userService: UserService,
+    private dataService: DataService,
+    private transactionService: TransactionService,
+    private notificationsService: NotificationsService,
+    private ga: GoogleAnalytics,
+    private loadingCtrl: LoadingController,
+    private formBuilder: FormBuilder,
+    private db: AngularFireDatabase,
+    private navParams: NavParams
+  ) {
 
     userService.userSubject.subscribe(
       user => this.user = user,
@@ -38,9 +48,9 @@ export class SendPage {
       () => {}
     );
 
-    this._searchControl = new FormControl();
+    this.searchControl = new FormControl();
 
-    this._sendForm = formBuilder.group({
+    this.sendForm = formBuilder.group({
       toUserKey: ['',  Validators.required],
       amount: ['', Validators.required],
       message: ['']
@@ -53,13 +63,13 @@ export class SendPage {
   }
 
   setFilteredItems() {
-      this._searchUsers = this._dataService.filterUsers(this._searchTerm);
+      this.searchUsers = this.dataService.filterUsers(this.searchTerm);
    }
 
    clickUser(user) {
-     this._toUser = user;
-     this._sendForm.patchValue({toUserKey:user.$key});
-     this._searchUsers = null;
+     this.toUser = user;
+     this.sendForm.patchValue({toUserKey:user.$key});
+     this.searchUsers = null;
    }
 
   onSubmit(formValues, formValid) {
@@ -68,7 +78,9 @@ export class SendPage {
       return;
 
     if(this.user.balance < formValues.amount) {
-      this._error = "Not enough circles";
+      this.notificationsService.create('Send Fail','','error');
+      let msg = "You don't have enough Circles!";
+      this.notificationsService.create('Balance', msg, 'warn');
       return;
     }
     this.loading.present();
@@ -81,10 +93,10 @@ export class SendPage {
       type: 'transaction'
     };
 
-    if (this._transactionService.createTransactionIntent(formValues.toUserKey, formValues.amount, formValues.message)) {
-
+    if (this.transactionService.createTransactionIntent(formValues.toUserKey, formValues.amount, formValues.message)) {
+      debugger
       this.notificationsService.create('Send Success','','success');
-      let msg = 'Sent ' + formValues.amount + ' Circles to ' + this._toUser.displayName;
+      let msg = 'Sent ' + formValues.amount + ' Circles to ' + this.toUser.displayName;
       this.notificationsService.create('Transaction', msg, 'info');
     }
     else {
@@ -92,8 +104,8 @@ export class SendPage {
     }
 
     //reset the recipient field
-    this._toUser = null;
-    this._sendForm.reset();
+    this.toUser = null;
+    this.sendForm.reset();
     this.loading.dismiss();
 
   }

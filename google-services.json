@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "551885395202",
+    "firebase_url": "https://circles-testnet.firebaseio.com",
+    "project_id": "circles-testnet",
+    "storage_bucket": "circles-testnet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551885395202:android:77c040681ac25054",
+        "android_client_info": {
+          "package_name": "com.edzillion.circles_testnet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "551885395202-edv7snd2db48rd8dpurqje3vkavpbp22.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCS7zlAcQInDSGbOsjAv4VDAt8LKOdXnsU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

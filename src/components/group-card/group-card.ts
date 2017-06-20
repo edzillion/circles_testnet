@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-
 import { LoadingController, ModalController } from 'ionic-angular';
 
-import { PurchaseModal } from '../../pages/purchase-modal/purchase-modal'
+import 'rxjs/add/operator/take';
 
+import { PurchaseModal } from '../../pages/purchase-modal/purchase-modal'
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsService } from '../../providers/news-service/news-service';
-import { NotificationsService } from 'angular2-notifications';
+import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
 
 @Component({
   selector: 'group-card',
@@ -42,7 +42,13 @@ export class GroupCard {
 
   private headerIcon: string = 'arrow-dropdown';
 
-  constructor(private notificationsService: NotificationsService, private newsService: NewsService, private userService: UserService, public modalCtrl: ModalController, private db: AngularFireDatabase, private loadingCtrl: LoadingController) {
+  constructor(
+    private notificationsService: NotificationsService,
+    private newsService: NewsService,
+    private userService: UserService,
+    public modalCtrl: ModalController,
+    private db: AngularFireDatabase,
+    private loadingCtrl: LoadingController) {
 
     userService.userSubject.subscribe(
       user => this.user = user,

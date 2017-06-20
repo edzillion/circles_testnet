@@ -1,11 +1,9 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
-import { AfterViewInit } from '@angular/core';
-import { Content, Events, Header, IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Component } from '@angular/core';
+import { Events, IonicPage, NavController, NavParams } from 'ionic-angular';
 
 import { GroupsPage } from '../groups/groups';
 import { SendPage } from '../send/send';
 import { HomePage } from '../home/home';
-import { LoginPage } from '../login/login';
 import { OfferPage } from '../offer/offer';
 
 import { AngularFireAuth } from 'angularfire2/auth';
@@ -17,7 +15,7 @@ import { UserService } from '../../providers/user-service/user-service';
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
-  
+
   private user: any;
 
   tab1Root = HomePage;
@@ -25,16 +23,22 @@ export class TabsPage {
   tab3Root = SendPage;
   tab4Root = OfferPage;
 
-  private _nav: any;
+  private nav: any;
 
-  private _pageTitle: string = "Home";
+  private pageTitle: string = "Home";
 
   constructor(private userService: UserService, public events: Events, public navParams: NavParams, private afAuth: AngularFireAuth, public navCtrl: NavController) {
-    this._nav = this.navParams.get('nav');
+    this.nav = this.navParams.get('nav');
+
+    userService.userSubject.subscribe(
+      user => this.user = user,
+      err => console.error(err),
+      () => {}
+    );
   }
 
   onTabSelect(event) {
-    this._pageTitle = event.id
+    this.pageTitle = event.id
   }
 
   ionViewDidLoad() {

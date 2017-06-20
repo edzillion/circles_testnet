@@ -1,13 +1,15 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { HomePage } from './home';
+import { NewsCardModule } from '../../components/news-card/news-card.module';
 
 @NgModule({
   declarations: [
-    HomePage,
+    HomePage
   ],
   imports: [
-    IonicPageModule.forChild(HomePage),
+    NewsCardModule,
+    IonicPageModule.forChild(HomePage)
   ],
   exports: [
     HomePage

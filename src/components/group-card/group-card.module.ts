@@ -13,4 +13,4 @@ import { GroupCard } from './group-card';
     GroupCard
   ]
 })
-export class NewsCardComponentModule {}
+export class GroupCardModule {}

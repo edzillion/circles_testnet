@@ -9,7 +9,6 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 import { Camera } from '@ionic-native/camera';
 import { Geolocation } from '@ionic-native/geolocation';
-import { Push } from '@ionic-native/push';
 
 //app
 import { MyApp } from './app.component';
@@ -31,8 +30,8 @@ import { UserService } from '../providers/user-service/user-service';
 import { TransactionService } from '../providers/transaction-service/transaction-service';
 import { NewsService } from '../providers/news-service/news-service';
 
-import { NewsCard } from '../components/news-card/news-card';
-import { GroupCard } from '../components/group-card/group-card';
+import { NewsCardModule } from '../components/news-card/news-card.module';
+import { GroupCardModule } from '../components/group-card/group-card.module';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -49,34 +48,23 @@ import { TagInputModule } from 'ng2-tag-input';
 import { environment } from '../environments/environment';
 import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
 
-//pipes
-import { KeyToUserPipe } from '../pipes/key-to-user/key-to-user';
-import { KeyToUserNamePipe } from '../pipes/key-to-username/key-to-username';
-import { TimeAgoPipe } from 'time-ago-pipe';
-import { ReverseOrderPipe } from '../pipes/reverse-order/reverse-order';
-
-
 @NgModule({
   declarations: [
     MyApp,
     HomePage,
-    GroupsPage,
     SendPage,
     OfferPage,
+    GroupsPage,
     TabsPage,
     LoginPage,
     LoginEmailPage,
     SignupEmailPage,
     ProfilePage,
-    NewsCard,
-    GroupCard,
-    PurchaseModal,
-    KeyToUserPipe,
-    KeyToUserNamePipe,
-    TimeAgoPipe,
-    ReverseOrderPipe
+    PurchaseModal
   ],
   imports: [
+    NewsCardModule,
+    GroupCardModule,
     BrowserModule,
     BrowserAnimationsModule,
     TagInputModule,
@@ -105,17 +93,12 @@ import { ReverseOrderPipe } from '../pipes/reverse-order/reverse-order';
     TransactionService,
     Camera,
     Geolocation,
-    Push,
     StatusBar,
     SplashScreen,
     GoogleAnalytics,
     {provide: APP_CONFIG, useValue: APP_DI_CONFIG},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     NewsService,
-    KeyToUserPipe,
-    KeyToUserNamePipe,
-    TimeAgoPipe,
-    ReverseOrderPipe,
     DataService,
     UserService
   ]

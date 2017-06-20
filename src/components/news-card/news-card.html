@@ -2,7 +2,7 @@
 
   <ion-card-header>
     {{newsItem.type}}
-    <span style="float:right">{{newsItem.timestamp | timeAgo}}</span>
+    <span style="float:right">{{newsItem.timestamp | timeAgo }}</span>
   </ion-card-header>
 
   <ion-card-content>
@@ -22,10 +22,10 @@
       You have successfully joined the group: {{newsItem.title}}
     </span>
     <span *ngIf="newsItem.type == 'purchase'">
-      You have bought {{newsItem.title}} from {{newsItem.from}}
+      You have bought {{newsItem.title}} from {{newsItem.from | keytousername | async }}
     </span>
     <span *ngIf="newsItem.type == 'sale'">
-      Sold {{newsItem.title}} to {{newsItem.from}} 
+      Sold {{newsItem.title}} to {{newsItem.from | keytousername | async }}
     </span>
   </ion-card-content>
 

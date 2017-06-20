@@ -33,7 +33,7 @@ export class UserService {
                 // set up this service's user subscrioption and then called
                 // this.initSubject.next(false); to end the initialisation process
                 userSub.unsubscribe();
-                this.userSubject = new BehaviorSubject(user)
+                this.userSubject = new BehaviorSubject(user);
                 //this.userSubject is our app wide user Subscription
                 userSub = this.db.object('/users/' + auth.uid).subscribe(
                   user => this.userSubject.next(user)
@@ -54,12 +54,19 @@ export class UserService {
     )
   }
 
+  keyToUser(key: string): Observable<any> {
+    return this.db.object('/users/'+key).take(1);
+  }
+
+  keyToUserName(key: string): Observable<any> {
+    return this.db.object('/users/'+key).take(1).map( (user) => user.displayName);
+  }
+
   save(user) {
     this.user.set(user);
   }
 
   ngOnDestroy () {
-    debugger;
     this.authSub.unsubscribe();
   }
 }

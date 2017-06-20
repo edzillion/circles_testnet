@@ -12,7 +12,7 @@ import * as firebase from 'firebase';
 
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsService } from '../../providers/news-service/news-service';
-import { NotificationsService } from 'angular2-notifications';
+import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
 
 @IonicPage()
 @Component({
@@ -29,12 +29,12 @@ export class OfferPage {
   loading: any;
   loading2: any;
 
-  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private _ds: DomSanitizer, private _geo: Geolocation, private _camera: Camera, private ga: GoogleAnalytics, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _db: AngularFireDatabase, private navParams: NavParams) {
+  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private ds: DomSanitizer, private geo: Geolocation, private camera: Camera, private ga: GoogleAnalytics, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private db: AngularFireDatabase, private navParams: NavParams) {
 
     userService.userSubject.subscribe(
       user => {
         this.user = user;
-        this.userOffers = _db.list('users/' + this.user.$key + '/offers');
+        this.userOffers = db.list('users/' + this.user.$key + '/offers');
       },
       err => console.error(err)
     );
@@ -57,7 +57,7 @@ export class OfferPage {
 
     this.loading2.present();
 
-    this._geo.getCurrentPosition().then((geo) => {
+    this.geo.getCurrentPosition().then((geo) => {
       //todo:set a tick mark on the button on success
       this.offerForm.patchValue({ latitude: geo.coords.latitude });
       this.offerForm.patchValue({ longitude: geo.coords.longitude });
@@ -140,10 +140,10 @@ export class OfferPage {
 
   selectFromGallery(form) {
     var options = {
-      sourceType: this._camera.PictureSourceType.PHOTOLIBRARY,
-      destinationType: this._camera.DestinationType.DATA_URL
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
+      destinationType: this.camera.DestinationType.DATA_URL
     };
-    this._camera.getPicture(options).then((imageData) => {
+    this.camera.getPicture(options).then((imageData) => {
       // imageData is a base64 encoded string
       this.base64ImageData = imageData;
       form.patchValue({ picURL: "data:image/jpeg;base64," + imageData });
@@ -155,10 +155,10 @@ export class OfferPage {
 
   openCamera(form) {
     var options = {
-      sourceType: this._camera.PictureSourceType.CAMERA,
-      destinationType: this._camera.DestinationType.DATA_URL
+      sourceType: this.camera.PictureSourceType.CAMERA,
+      destinationType: this.camera.DestinationType.DATA_URL
     };
-    this._camera.getPicture(options).then((imageData) => {
+    this.camera.getPicture(options).then((imageData) => {
       // imageData is a base64 encoded string
       this.base64ImageData = imageData;
       form.patchValue({ picURL: "data:image/jpeg;base64," + imageData });

@@ -4,9 +4,6 @@ import 'rxjs/add/operator/map';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
-
-import { KeyToUserPipe } from '../../pipes/key-to-user/key-to-user';
 
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
@@ -21,7 +18,7 @@ export class TransactionService {
   private user: any;
   private transactionLog: FirebaseListObservable<any>;
 
-  constructor(private userService: UserService, private newsService: NewsService, private db: AngularFireDatabase, private keyToUserPipe: KeyToUserPipe) {
+  constructor(private userService: UserService, private newsService: NewsService, private db: AngularFireDatabase) {
 
     userService.userSubject.subscribe(
       user => this.user = user,
@@ -74,7 +71,7 @@ export class TransactionService {
 
   createPurchaseIntent(sellerUserId, offer): Promise<boolean> {
     let p = new Promise( (resolve, reject) => {
-      this.keyToUserPipe.transform(sellerUserId).subscribe( (sellerUser) => {
+      this.userService.keyToUser(sellerUserId).subscribe( (sellerUser) => {
         if (this.transfer(sellerUser, offer.price)) {
           this.logTransfer(sellerUser, offer, 'purchase');
           this.newsService.addPurchase(offer);
@@ -90,15 +87,15 @@ export class TransactionService {
 
   createTransactionIntent(toUserId:string, amount:number, message?:string): Promise<boolean> {
     let p = new Promise( (resolve, reject) => {
-      this.keyToUserPipe.transform(toUserId).subscribe( (toUser) => {
-        if(this.transfer(toUserId, amount)) {
+      this.userService.keyToUser(toUserId).subscribe( (toUser) => {
+        if(this.transfer(toUser, amount)) {
           let offerObj = {
             price:amount,
             title:'Transaction',
             to: toUserId,
             toUser: toUser
           };
-          this.logTransfer(toUserId, offerObj, 'transfer', message);
+          this.logTransfer(toUser, offerObj, 'transfer', message);
           this.newsService.addTransaction(offerObj);
           resolve(true);
         }

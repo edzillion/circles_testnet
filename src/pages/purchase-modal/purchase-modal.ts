@@ -8,10 +8,6 @@ import { NotificationsService } from 'angular2-notifications';
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsService } from '../../providers/news-service/news-service';
 
-import * as firebase from 'firebase/app';
-
-import { KeyToUserNamePipe } from '../../pipes/key-to-username/key-to-username';
-
 @IonicPage()
 @Component({
   selector: 'page-purchase-modal',
@@ -19,21 +15,15 @@ import { KeyToUserNamePipe } from '../../pipes/key-to-username/key-to-username';
 })
 export class PurchaseModal {
 
-  private sellerName: string;
   private offer: any;
-
   private user: any;
   private error: any;
-
-  private formState = {
-    submitAttempt: <boolean>false,
-  };
 
   private loading: any;
 
   private transactionForm: FormGroup;
 
-  constructor(private newsService: NewsService, private keyToUserNamePipe: KeyToUserNamePipe, private userService: UserService, private notificationsService: NotificationsService, private transactionService: TransactionService, private formBuilder: FormBuilder, private loadingCtrl: LoadingController, private navParams: NavParams, private viewCtrl: ViewController) {
+  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private transactionService: TransactionService, private formBuilder: FormBuilder, private loadingCtrl: LoadingController, private navParams: NavParams, private viewCtrl: ViewController) {
 
     userService.userSubject.subscribe(
       user => this.user = user,
@@ -42,7 +32,7 @@ export class PurchaseModal {
     );
 
     this.offer = navParams.get('offer');
-    keyToUserNamePipe.transform(this.offer.seller).subscribe( (sellerName) => {
+    userService.keyToUserName(this.offer.seller).subscribe( (sellerName) => {
         this.offer.sellerName = sellerName;
     });
 
@@ -59,6 +49,10 @@ export class PurchaseModal {
 
     if(this.user.balance < this.offer.price) {
       this.error = "Not enough circles";
+      this.notificationsService.create('Purchase Fail','','error');
+      let msg = "You don't have enough Circles!";
+      this.notificationsService.create('Balance', msg, 'warn');
+      this.viewCtrl.dismiss(false);
       return;
     }
 

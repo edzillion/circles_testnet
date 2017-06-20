@@ -67,13 +67,14 @@
             </ion-col>
             <ion-col>
               <h2>{{offerSelected.title}}</h2>
-              <p>{{offerSelected.description}}
+              <p>{{offerSelected.description}}</p>
             </ion-col>
           </ion-row>
-          <span>
-            Purchase for {{offerSelected?.price}} Circles?
-          </span>
+          <hr>
           <span class="buy-offer-button">
+            <span>
+              Purchase {{offerSelected?.title}} for {{offerSelected?.price}} Circles?
+            </span>
             <button ion-button color="danger" (click)="offerSelected = null">
               CANCEL
             </button>

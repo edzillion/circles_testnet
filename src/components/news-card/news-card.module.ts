@@ -1,16 +1,18 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { NewsCard } from './news-card';
+import { PipesModule } from '../../pipes/pipes'
 
 @NgModule({
   declarations: [
     NewsCard,
   ],
   imports: [
-    IonicPageModule.forChild(NewsCard),
+    PipesModule,
+    IonicPageModule.forChild(NewsCard)
   ],
   exports: [
     NewsCard
   ]
 })
-export class NewsCardComponentModule {}
+export class NewsCardModule {}

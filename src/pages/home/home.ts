@@ -12,6 +12,8 @@ import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/databa
 
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
+import { NewsCardModule } from '../../components/news-card/news-card.module';
+
 
 @IonicPage()
 @Component({
@@ -37,6 +39,10 @@ export class HomePage {
       err => console.error(err),
       () => {}
     );
+  }
+
+  cd() {
+    this.newsService.allNewsItemsReversed.subscribe( (xs) => {debugger});
   }
 
   ionViewDidLoad() {
