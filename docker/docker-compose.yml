@@ -1,0 +1,11 @@
+io:
+  build: .
+  ports:
+    - 8000:8000
+  volumes:
+#    - <path on your host with the git-repository, accessible by Docker>:/var/app
+     - c:/Users/ingo/Development/nodejs/circles_testnet:/var/app
+  stdin_open: true
+  tty: true
+#  if the below line is active Docker will start in web server development mode, inactively it will start with bash
+  command: ionic serve -s -b -p 8000

@@ -26,10 +26,19 @@ platforms/
 plugins/
 plugins/android.json
 plugins/ios.json
-src/environments/
-www/
+
+src/environments/*
+#keep dummy environment file
+!src/environments/environment.ts.dummy
+
+/www/*
+##keep files added by ionic start command
+!/www/lib/
+
+
 $RECYCLE.BIN/
 
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
+

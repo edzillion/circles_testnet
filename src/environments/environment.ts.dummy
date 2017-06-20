@@ -1,0 +1,17 @@
+export const environment =  {
+  "production": false,
+  "firebase": {
+    "host": "localhost",
+    "apiKey": "dummy",
+    "authDomain": "dummy.firebaseapp.com",
+    "databaseURL": "https://dummy.com",
+    "projectId": "dummy",
+    "storageBucket": "dummy.appspot.com",
+    "messagingSenderId": "0123456789"
+  },
+  cloudSettings : {
+    push: {
+      "sender_id": "JohnDoe"
+    }
+  }
+};
