@@ -15,4 +15,4 @@ import { NewsCardModule } from '../../components/news-card/news-card.module';
     HomePage
   ]
 })
-export class HomeModule {}
+export class HomePageModule {}

@@ -1,13 +1,10 @@
-import { Component, NgZone, OnInit, ViewChild } from '@angular/core';
-import { AlertController, Content, Events, Header, Platform } from 'ionic-angular';
+import { Component, NgZone, ViewChild } from '@angular/core';
+import { AlertController, LoadingController, Events, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { AngularFireAuthModule } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
-import * as firebase from 'firebase/app';
-import { Observable } from 'rxjs/Observable';
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from '../pages/login/login';
@@ -24,8 +21,7 @@ export class MyApp {
   private rootPage: Component = LoginPage;
   @ViewChild('content') nav;
 
-  private userAuth: Observable<firebase.User>;
-  private contentOffset: number;
+  private loading: any;
 
   //todo: better way to do this?
   public updateContentOffset: any;
@@ -40,11 +36,15 @@ export class MyApp {
     private platform: Platform,
     statusBar: StatusBar,
     splashScreen: SplashScreen,
-    private ga: GoogleAnalytics
+    private ga: GoogleAnalytics,
+    private loadingCtrl: LoadingController
   ) {
 
     platform.ready()
       .then(() => {
+
+
+
         if (this.platform.is('cordova')) {
           this.ga.startTrackerWithId(environment.googleAnalytics.id);
         } else {
@@ -54,7 +54,7 @@ export class MyApp {
         statusBar.styleDefault();
         this.userService.initSubject.subscribe(
           noProfile => {
-
+            
             if (noProfile)
               this.nav.setRoot(ProfilePage, { user: noProfile, nav: this.nav });
             else

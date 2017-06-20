@@ -94,7 +94,7 @@ export class SendPage {
     };
 
     if (this.transactionService.createTransactionIntent(formValues.toUserKey, formValues.amount, formValues.message)) {
-      debugger
+
       this.notificationsService.create('Send Success','','success');
       let msg = 'Sent ' + formValues.amount + ' Circles to ' + this.toUser.displayName;
       this.notificationsService.create('Transaction', msg, 'info');

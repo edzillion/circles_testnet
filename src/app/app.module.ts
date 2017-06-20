@@ -12,17 +12,18 @@ import { Geolocation } from '@ionic-native/geolocation';
 
 //app
 import { MyApp } from './app.component';
-import { HomePage } from '../pages/home/home';
-import { GroupsPage } from '../pages/groups/groups';
-import { SendPage } from '../pages/send/send';
-import { OfferPage } from '../pages/offer/offer';
+import { HomePageModule } from '../pages/home/home.module';
+import { GroupsPageModule } from '../pages/groups/groups.module';
+import { SendPageModule } from '../pages/send/send.module';
+import { OfferPageModule } from '../pages/offer/offer.module';
+import { TabsPageModule } from '../pages/tabs/tabs.module';
 import { TabsPage } from '../pages/tabs/tabs';
-import { LoginPage } from '../pages/login/login';
-import { LoginEmailPage } from '../pages/login-email/login-email';
-import { SignupEmailPage } from '../pages/signup-email/signup-email';
-import { ProfilePage } from '../pages/profile/profile';
+import { LoginPageModule } from '../pages/login/login.module';
+import { LoginEmailPageModule } from '../pages/login-email/login-email.module';
+import { SignupEmailPageModule } from '../pages/signup-email/signup-email.module';
+import { ProfilePageModule } from '../pages/profile/profile.module';
 
-import { PurchaseModal } from '../pages/purchase-modal/purchase-modal'
+import { PurchaseModalModule } from '../pages/purchase-modal/purchase-modal.module'
 
 
 import { DataService } from '../providers/data-service/data-service';
@@ -37,7 +38,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 //vendor
-import { SuperTabsModule } from 'ionic2-super-tabs';
+//import { SuperTabsModule } from 'ionic2-super-tabs';
 import { AngularFireModule } from 'angularfire2';
 import { AngularFireDatabaseModule } from 'angularfire2/database';
 import { AngularFireAuthModule } from 'angularfire2/auth';
@@ -50,17 +51,7 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
 
 @NgModule({
   declarations: [
-    MyApp,
-    HomePage,
-    SendPage,
-    OfferPage,
-    GroupsPage,
-    TabsPage,
-    LoginPage,
-    LoginEmailPage,
-    SignupEmailPage,
-    ProfilePage,
-    PurchaseModal
+    MyApp
   ],
   imports: [
     NewsCardModule,
@@ -69,25 +60,26 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
     BrowserAnimationsModule,
     TagInputModule,
     SimpleNotificationsModule.forRoot(),
-    SuperTabsModule.forRoot(),
+    //SuperTabsModule.forRoot(),
     IonicModule.forRoot(MyApp),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireDatabaseModule,
-    AngularFireAuthModule
+    AngularFireAuthModule,
+    HomePageModule,
+    SendPageModule,
+    OfferPageModule,
+    GroupsPageModule,
+    LoginPageModule,
+    LoginEmailPageModule,
+    SignupEmailPageModule,
+    ProfilePageModule,
+    TabsPageModule,
+    PurchaseModalModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage,
-    GroupsPage,
-    SendPage,
-    OfferPage,
-    TabsPage,
-    LoginPage,
-    LoginEmailPage,
-    SignupEmailPage,
-    ProfilePage,
-    PurchaseModal
+    TabsPage
   ],
   providers: [
     TransactionService,

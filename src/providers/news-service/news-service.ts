@@ -107,8 +107,8 @@ export class NewsService {
 
   public addTransaction(txItem) {
     //this will only be called for sending to someone else
-    this.notificationsService.create('Transfer Success','','success');
-    let msg = 'Sent ' + txItem.amount + ' Circles to ' + txItem.title;
+    this.notificationsService.create('Send Success','','success');
+    let msg = 'Sent ' + txItem.amount + ' Circles to ' + txItem.toUser.displayName;
     this.notificationsService.create('Transaction', msg, 'info');
 
     let newsItem = {
