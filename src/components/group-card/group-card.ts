@@ -1,35 +1,36 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-import { LoadingController, ModalController } from 'ionic-angular';
+import { Loading, LoadingController, ModalController } from 'ionic-angular';
 
+import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
+import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/take';
 
 import { PurchaseModal } from '../../pages/purchase-modal/purchase-modal'
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsService } from '../../providers/news-service/news-service';
-import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
 
 @Component({
   selector: 'group-card',
   templateUrl: 'group-card.html'
 })
-export class GroupCard {
+export class GroupCard implements OnInit, OnDestroy {
 
   @Input('group') group: any;
-  @Input('requirements') allRequirements: FirebaseListObservable<any>;
+  @Input('requirements') allRequirements$: FirebaseListObservable<any>;
   @Input('height') contentHeight: number;
 
   private user: any;
+  private userSub$: Subscription;
+  private groupRequirements$: FirebaseListObservable<any>;
 
-  private loading: any;
   private allRequirementsMet: boolean = true;
-  private groupRequirements: any;
   private noConfirm: boolean = false; //set to true if the group contains the requirement.$key 'noconfirm'
-  private name: string;
+  private groupName: string;
   private isAMember: boolean = false;
   private hasApplied: boolean = false;
 
-  public active: boolean = false;
+  private active: boolean = false;
 
   private members: Array<any> = [];
   private memberSelected: any;
@@ -39,44 +40,38 @@ export class GroupCard {
   private groupWants: Array<any> = [];
 
   private view: string = 'offers';
-
   private headerIcon: string = 'arrow-dropdown';
+  private loading: Loading;
 
   constructor(
-    private notificationsService: NotificationsService,
     private newsService: NewsService,
     private userService: UserService,
     public modalCtrl: ModalController,
     private db: AngularFireDatabase,
-    private loadingCtrl: LoadingController) {
+    private loadingCtrl: LoadingController
+  ) {  }
 
-    userService.userSubject.subscribe(
-      user => this.user = user,
-      err => console.error(err),
-      () => {}
-    );
-  }
-
-  selectMember(member) {
+  private selectMember(member) {
     this.memberSelected = member;
   }
 
-  selectOffer(offer) {
+  private selectOffer(offer) {
     this.offerSelected = offer;
   }
 
-  buyOffer() {
+  private buyOffer() {
     let circleModal = this.modalCtrl.create(PurchaseModal, { offer: this.offerSelected });
     circleModal.present().then( (result) => {
       this.offerSelected = null;
     });
   }
 
-  joinGroup() {
+  private joinGroup() {
     if (this.allRequirementsMet) {
       if (this.noConfirm) {
         this.loading = this.loadingCtrl.create({
-          content: 'Joining group...'
+          content: 'Joining group...',
+          //dismissOnPageChange: true
         });
         this.loading.present();
         this.group.members.push(this.user.$key);
@@ -88,6 +83,7 @@ export class GroupCard {
       else {
         this.loading = this.loadingCtrl.create({
           content: 'Applying to join group...',
+          //dismissOnPageChange: true,
           duration: 2000
         });
         this.loading.present();
@@ -97,20 +93,20 @@ export class GroupCard {
     }
   }
 
-  selectedOffers() {
+  private selectedOffers() {
     this.view = 'offers';
   }
 
-  selectedWants() {
+  private selectedWants() {
     this.view = 'wants';
   }
 
-  toggleShowGroup() {
+  private toggleShowGroup() {
     this.active = !this.active;
     this.headerIcon = (this.active) ? 'arrow-dropup' : 'arrow-dropdown';
   }
 
-  assignRequirementCompletion(requirement: any) : boolean {
+  private assignRequirementCompletion(requirement: any) : boolean {
     switch (requirement.$key) {
       case "email": {
         requirement.isComplete = (this.user.email != '');
@@ -155,7 +151,13 @@ export class GroupCard {
 
   ngOnInit() {
 
-    this.name = this.group.displayName;
+    this.userSub$ = this.userService.user$.subscribe(
+      user => this.user = user,
+      err => console.error(err),
+      () => {}
+    );
+
+    this.groupName = this.group.displayName;
 
     this.group.members.map(member => {
       this.db.object('/users/' + member).take(1).subscribe(
@@ -180,7 +182,7 @@ export class GroupCard {
 
     this.isAMember = this.group.members.includes(this.user.$key);
 
-    this.groupRequirements = this.allRequirements.map( reqs =>
+    this.groupRequirements$ = this.allRequirements$.map( reqs =>
       reqs.filter( req => {
         if (req.$key == 'noconfirm') {
           this.noConfirm = true;
@@ -193,6 +195,11 @@ export class GroupCard {
           return this.group.requirements.includes(req.$key);
         }
         return false;
-      }));
+      })) as FirebaseListObservable<any>;
+
+  }
+
+  ngOnDestroy() {
+    this.userSub$.unsubscribe();
   }
 }

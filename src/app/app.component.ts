@@ -1,10 +1,12 @@
-import { Component, NgZone, ViewChild } from '@angular/core';
-import { AlertController, LoadingController, Events, Platform } from 'ionic-angular';
+import { Component, OnDestroy, NgZone, ViewChild } from '@angular/core';
+import { AlertController, Loading, LoadingController, Events, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
+
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
+import { Subscription } from 'rxjs/Subscription';
 
 import { TabsPage } from '../pages/tabs/tabs';
 import { LoginPage } from '../pages/login/login';
@@ -16,12 +18,14 @@ import { environment } from '../environments/environment';
 @Component({
   templateUrl: 'app.html'
 })
-export class MyApp {
+export class MyApp implements OnDestroy {
 
   private rootPage =  LoginPage;
   @ViewChild('content') nav;
 
-  private loading: any;
+  private loading: Loading;
+
+  private initSub$: Subscription;
 
   //todo: better way to do this?
   public updateContentOffset: any;
@@ -31,19 +35,17 @@ export class MyApp {
     private userService: UserService,
     private ngZone: NgZone,
     public events: Events,
-    public afAuth: AngularFireAuth,
+    private afAuth: AngularFireAuth,
     private db: AngularFireDatabase,
     private platform: Platform,
-    statusBar: StatusBar,
-    splashScreen: SplashScreen,
+    private statusBar: StatusBar,
+    private splashScreen: SplashScreen,
     private ga: GoogleAnalytics,
     private loadingCtrl: LoadingController
   ) {
 
     platform.ready()
       .then(() => {
-
-
 
         if (this.platform.is('cordova')) {
           this.ga.startTrackerWithId(environment.googleAnalytics.id);
@@ -52,7 +54,7 @@ export class MyApp {
         }
 
         statusBar.styleDefault();
-        this.userService.initSubject.subscribe(
+        this.initSub$ = this.userService.initSubject$.subscribe(
           noProfile => {
 
             if (noProfile)
@@ -66,7 +68,7 @@ export class MyApp {
       });
   }
 
-  goToProfile() {
+  private goToProfile() {
     let alert = this.alertController.create({
       title: 'Confirm Profile Change',
       message: 'This will reset your profile. Continue?',
@@ -81,7 +83,9 @@ export class MyApp {
         {
           text: 'OK',
           handler: () => {
-            this.nav.setRoot(ProfilePage, {user: this.userService.userSubject.getValue()});
+            this.userService.user$.take(1).subscribe( user => {
+              this.nav.setRoot(ProfilePage, {user: user});
+            });
           }
         }
       ]
@@ -89,11 +93,8 @@ export class MyApp {
     alert.present();
   }
 
-
-  logout() {
-    //close subscriptions??
-
-
+  private logout() {
+    //close subscriptions?? close services??
     this.userService.auth.signOut().then((user) => {
       console.log('logout success');
       this.nav.setRoot(LoginPage);
@@ -102,6 +103,9 @@ export class MyApp {
     });
   }
 
+  ngOnDestroy () {
 
+    this.initSub$.unsubscribe();
+  }
 
 }

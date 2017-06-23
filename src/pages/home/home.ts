@@ -1,19 +1,15 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
-
-import { Subject } from 'rxjs/Subject';
-
 import { IonicPage, NavParams, ModalController } from 'ionic-angular';
-
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 
+import { Subscription } from 'rxjs/Subscription';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsCardModule } from '../../components/news-card/news-card.module';
-
 
 @IonicPage()
 @Component({
@@ -23,31 +19,29 @@ import { NewsCardModule } from '../../components/news-card/news-card.module';
 export class HomePage {
 
   private userFirstName: string;
-  private userBalance: string;
   private user: any;
+  private userSub$: Subscription;
 
-  members: Array<any>;
-  circles: FirebaseListObservable<any>;
-  transactions: FirebaseListObservable<any>;
+  constructor(
+    private userService: UserService,
+    private newsService: NewsService,
+    private ga: GoogleAnalytics
+  ) { }
 
-  transactionsSubject: Subject<any>;
+  ionViewDidLoad() {
+    this.ga.trackView('Home Page');
 
-  constructor(private userService: UserService, private newsService: NewsService, private ga: GoogleAnalytics) {
-
-    userService.userSubject.subscribe(
-      user => this.user = user,
+    this.userSub$ = this.userService.user$.subscribe(
+      user => {
+        this.user = user;
+      },
       err => console.error(err),
       () => {}
     );
   }
 
-  cd() {
-    this.newsService.allNewsItemsReversed.subscribe( (xs) => {debugger});
-  }
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad Home');
-    this.ga.trackView('Home Page');
+  ionViewWillUnload () {
+    this.userSub$.unsubscribe();
   }
 
 }

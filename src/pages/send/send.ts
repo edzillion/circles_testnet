@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { IonicPage, LoadingController, NavParams } from 'ionic-angular';
+import { IonicPage, Loading, LoadingController, NavParams } from 'ionic-angular';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { FormBuilder, FormGroup, FormControl, Validators, } from '@angular/forms';
-
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
+
+import { Subscription } from 'rxjs/Subscription';
 import { NotificationsService } from 'angular2-notifications';
+
 import { TransactionService } from '../../providers/transaction-service/transaction-service';
-import { DataService } from '../../providers/data-service/data-service';
 import { UserService } from '../../providers/user-service/user-service';
 
 import 'rxjs/add/operator/debounceTime';
@@ -25,12 +26,12 @@ export class SendPage {
   private sendForm: FormGroup;
   private toUser: any;
   private user: any;
+  private userSub$: Subscription;
 
-  loading: any;
+  private loading: Loading;
 
   constructor(
     private userService: UserService,
-    private dataService: DataService,
     private transactionService: TransactionService,
     private notificationsService: NotificationsService,
     private ga: GoogleAnalytics,
@@ -40,49 +41,40 @@ export class SendPage {
     private navParams: NavParams
   ) {
 
-    userService.userSubject.subscribe(
-      user => this.user = user,
-      err => console.error(err),
-      () => {}
-    );
-
     this.searchControl = new FormControl();
 
     this.sendForm = formBuilder.group({
-      toUserKey: ['',  Validators.required],
+      toUserKey: ['', Validators.required],
       amount: ['', Validators.required],
       message: ['']
     });
-
-    //for form submit
-    this.loading = loadingCtrl.create({
-      content: 'Sending ...'
-    });
   }
 
-  setFilteredItems() {
-      this.searchUsers = this.dataService.filterUsers(this.searchTerm);
-   }
+  private clickUser(user) {
+    this.toUser = user;
+    this.sendForm.patchValue({ toUserKey: user.$key });
+    this.searchUsers = null;
+  }
 
-   clickUser(user) {
-     this.toUser = user;
-     this.sendForm.patchValue({toUserKey:user.$key});
-     this.searchUsers = null;
-   }
+  private onSubmit(formValues, formValid) {
 
-  onSubmit(formValues, formValid) {
+    //for form submit
+    this.loading = this.loadingCtrl.create({
+      content: 'Sending ...'
+    });
+
+    this.loading.present();
 
     if (!formValid)
       return;
 
-    if(this.user.balance < formValues.amount) {
-      this.notificationsService.create('Send Fail','','error');
+    if (this.user.balance < formValues.amount) {
+      this.notificationsService.create('Send Fail', '', 'error');
       let msg = "You don't have enough Circles!";
       this.notificationsService.create('Balance', msg, 'warn');
+      this.loading.dismiss();
       return;
     }
-    
-    this.loading.present();
 
     if (this.transactionService.createTransactionIntent(formValues.toUserKey, formValues.amount, formValues.message)) {
       //reset the recipient field
@@ -92,14 +84,27 @@ export class SendPage {
       return;
     }
     else {
+      this.loading.dismiss();
       return;
     }
+  }
 
+  private setFilteredItems() {
+    this.searchUsers = this.userService.filterUsers$(this.searchTerm);
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad SendPage');
-    this.setFilteredItems();
+    this.ga.trackView('Send Page');
+
+    this.userSub$ = this.userService.user$.subscribe(
+      user => this.user = user,
+      err => console.error(err),
+      () => { }
+    );
+  }
+
+  ionViewWillUnload() {
+    this.userSub$.unsubscribe();
   }
 
 }

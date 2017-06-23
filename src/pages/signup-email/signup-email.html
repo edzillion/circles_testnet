@@ -15,7 +15,7 @@
   </ion-row>
   <ion-row>
     <ion-col>
-      <form [formGroup]="_createUserForm" (ngSubmit)="onSubmit(_createUserForm.value, _createUserForm.valid)">
+      <form [formGroup]="createUserForm" (ngSubmit)="onSubmit(createUserForm.value, createUserForm.valid)">
         <ion-list>
           <ion-list-header>
             Enter your details below
@@ -39,7 +39,7 @@
             </ion-item>
 
             <ion-item-divider>
-              <button ion-button [disabled]="!_createUserForm.valid" type="submit">Create my account</button>
+              <button ion-button [disabled]="!createUserForm.valid" type="submit">Create my account</button>
             </ion-item-divider>
 
           </ion-list>

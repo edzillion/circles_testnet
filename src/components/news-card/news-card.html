@@ -1,4 +1,4 @@
-<ion-card (click)="cd()">
+<ion-card >
 
   <ion-card-header>
     {{newsItem.type}}
@@ -6,27 +6,7 @@
   </ion-card-header>
 
   <ion-card-content>
-    <span *ngIf="newsItem.type == 'createProfile'">
-      Your Circles account was created!
-    </span>
-    <span *ngIf="newsItem.type == 'transaction' && user.$key == newsItem.from">
-      You sent {{newsItem.amount}} Circles to {{ newsItem.to | keytousername | async }}
-    </span>
-    <span *ngIf="newsItem.type == 'transaction' && user.$key == newsItem.to">
-      You received {{newsItem.amount}} Circles from {{ newsItem.from | keytousername | async }}
-    </span>
-    <span *ngIf="newsItem.type == 'offerListed'">
-      You have listed {{newsItem.title}} for sale on the market.
-    </span>
-    <span *ngIf="newsItem.type == 'groupJoin'">
-      You have successfully joined the group: {{newsItem.title}}
-    </span>
-    <span *ngIf="newsItem.type == 'purchase'">
-      You have bought {{newsItem.title}} from {{newsItem.from | keytousername | async }}
-    </span>
-    <span *ngIf="newsItem.type == 'sale'">
-      Sold {{newsItem.title}} to {{newsItem.from | keytousername | async }}
-    </span>
+    {{message}}
   </ion-card-content>
 
 </ion-card>

@@ -5,7 +5,7 @@
       <button class="header-button" [disabled]="!isAMember" ion-button icon-only (click)="toggleShowGroup()">
         <ion-icon name="{{headerIcon}}"></ion-icon>
       </button>
-      {{name}}
+      {{groupName}}
     </span>
   </ion-card-header>
 
@@ -17,7 +17,7 @@
         <ion-col class="requirements-text-col" left col-4>
           <span>REQUIREMENTS</span>
         </ion-col>
-        <ion-col class="icon-col" col-1 *ngFor="let req of groupRequirements | async">
+        <ion-col class="icon-col" col-1 *ngFor="let req of groupRequirements$ | async">
           <ion-icon icon-only name="{{req.icon}}" [ngClass]="{'req-not-met': !req.isComplete, 'req-met': req.isComplete}"></ion-icon>
         </ion-col>
         <ion-col text-right *ngIf="!isAMember">
