@@ -22,11 +22,8 @@ import { LoginPageModule } from '../pages/login/login.module';
 import { LoginEmailPageModule } from '../pages/login-email/login-email.module';
 import { SignupEmailPageModule } from '../pages/signup-email/signup-email.module';
 import { ProfilePageModule } from '../pages/profile/profile.module';
-
 import { PurchaseModalModule } from '../pages/purchase-modal/purchase-modal.module'
 
-
-import { DataService } from '../providers/data-service/data-service';
 import { UserService } from '../providers/user-service/user-service';
 import { TransactionService } from '../providers/transaction-service/transaction-service';
 import { NewsService } from '../providers/news-service/news-service';
@@ -91,7 +88,6 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
     {provide: APP_CONFIG, useValue: APP_DI_CONFIG},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     NewsService,
-    DataService,
     UserService
   ]
 })

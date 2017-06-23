@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavParams, ViewController, LoadingController } from 'ionic-angular';
+import { IonicPage, NavParams, ViewController, Loading, LoadingController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { GoogleAnalytics } from '@ionic-native/google-analytics';
 
-import { TransactionService } from '../../providers/transaction-service/transaction-service';
+import { Subscription } from 'rxjs/Subscription';
 import { NotificationsService } from 'angular2-notifications';
 
+import { TransactionService } from '../../providers/transaction-service/transaction-service';
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsService } from '../../providers/news-service/news-service';
 
@@ -17,24 +19,27 @@ export class PurchaseModal {
 
   private offer: any;
   private user: any;
+  private userSub$: Subscription;
   private error: any;
+  private sellerName: string;
 
-  private loading: any;
+  private loading: Loading;
 
   private transactionForm: FormGroup;
 
-  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private transactionService: TransactionService, private formBuilder: FormBuilder, private loadingCtrl: LoadingController, private navParams: NavParams, private viewCtrl: ViewController) {
-
-    userService.userSubject.subscribe(
-      user => this.user = user,
-      err => console.error(err),
-      () => {}
-    );
+  constructor(
+    private userService: UserService,
+    private notificationsService: NotificationsService,
+    private transactionService: TransactionService,
+    private formBuilder: FormBuilder,
+    private loadingCtrl: LoadingController,
+    private navParams: NavParams,
+    private viewCtrl: ViewController,
+    private ga: GoogleAnalytics
+  ) {
 
     this.offer = navParams.get('offer');
-    userService.keyToUserName(this.offer.seller).subscribe( (sellerName) => {
-        this.offer.sellerName = sellerName;
-    });
+
 
     this.transactionForm = formBuilder.group({
       to: ['', Validators.required]
@@ -57,7 +62,8 @@ export class PurchaseModal {
     }
 
     this.loading = this.loadingCtrl.create({
-      content: 'Purchasing ...'
+      content: 'Purchasing ...',
+      //dismissOnPageChange: true
     });
 
     this.loading.present();
@@ -80,7 +86,21 @@ export class PurchaseModal {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad PurchaseModal');
+    this.ga.trackView('Purchase Modal');
+
+    this.userSub$ = this.userService.user$.subscribe(
+      user => this.user = user,
+      err => console.error(err),
+      () => {}
+    );
+
+    this.userService.keyToUserName$(this.offer.seller).take(1).subscribe( (sellerName) => {
+        this.sellerName = sellerName;
+    });
+  }
+
+  ionViewWillUnload () {
+    this.userSub$.unsubscribe();
   }
 
 }

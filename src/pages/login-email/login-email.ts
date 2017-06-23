@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { IonicPage, LoadingController } from 'ionic-angular';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { IonicPage, Loading, LoadingController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { GoogleAnalytics } from '@ionic-native/google-analytics';
+
+import { AngularFireAuth } from 'angularfire2/auth';
 
 import { UserService } from '../../providers/user-service/user-service';
 
@@ -12,25 +14,32 @@ import { UserService } from '../../providers/user-service/user-service';
 })
 export class LoginEmailPage {
 
-  private _loginForm: FormGroup;
-  loading: any;
-  error: any;
+  private loginForm: FormGroup;
+  private loading: Loading;
+  private error: any;
 
-  constructor(private userService: UserService, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private _afAuth: AngularFireAuth) {
+  constructor(
+    private userService: UserService,
+    private loadingCtrl: LoadingController,
+    private formBuilder: FormBuilder,
+    private ga: GoogleAnalytics
+  ) {
 
-    this._loginForm = formBuilder.group({
+    this.loginForm = formBuilder.group({
       email: ['', Validators.required],
       password: ['', Validators.required]
     });
   }
 
-  onSubmit(formData, formValid) {
+  private onSubmit(formData, formValid) {
     if (!formValid)
       return;
 
     this.loading = this.loadingCtrl.create({
-      content: 'Logging In ...'
+      content: 'Logging In ...',
+      //dismissOnPageChange: true
     });
+
     this.loading.present()
 
     this.userService.auth.signInWithEmailAndPassword(
@@ -51,7 +60,7 @@ export class LoginEmailPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad LoginEmailPage');
+    this.ga.trackView('Login Email Page');
   }
 
 }

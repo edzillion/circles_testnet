@@ -1,18 +1,17 @@
 import { Component } from '@angular/core';
-import { IonicPage, LoadingController, NavParams } from 'ionic-angular';
-import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { IonicPage, Loading, LoadingController, NavParams } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators, } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-
 import { Camera } from '@ionic-native/camera';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 import { Geolocation } from '@ionic-native/geolocation';
 
+import { Subscription } from 'rxjs/Subscription';
+import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import * as firebase from 'firebase';
 
 import { UserService } from '../../providers/user-service/user-service';
 import { NewsService } from '../../providers/news-service/news-service';
-import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
 
 @IonicPage()
 @Component({
@@ -22,22 +21,25 @@ import { NotificationsService, SimpleNotificationsComponent } from 'angular2-not
 export class OfferPage {
 
   private user: any;
+  private userSub$: Subscription;
   private offerForm: FormGroup;
   private userOffers: FirebaseListObservable<any>;
   private base64ImageData: string;
 
-  loading: any;
-  loading2: any;
+  private loading: Loading;
+  private loading2: Loading;
 
-  constructor(private newsService: NewsService, private userService: UserService, private notificationsService: NotificationsService, private ds: DomSanitizer, private geo: Geolocation, private camera: Camera, private ga: GoogleAnalytics, private loadingCtrl: LoadingController, private formBuilder: FormBuilder, private db: AngularFireDatabase, private navParams: NavParams) {
-
-    userService.userSubject.subscribe(
-      user => {
-        this.user = user;
-        this.userOffers = db.list('users/' + this.user.$key + '/offers');
-      },
-      err => console.error(err)
-    );
+  constructor(
+    private newsService: NewsService,
+    private userService: UserService,
+    private ds: DomSanitizer,
+    private geo: Geolocation,
+    private camera: Camera,
+    private ga: GoogleAnalytics,
+    private loadingCtrl: LoadingController,
+    private formBuilder: FormBuilder,
+    private db: AngularFireDatabase
+  ) {
 
     this.offerForm = formBuilder.group({
       picURL: [''],
@@ -49,10 +51,11 @@ export class OfferPage {
     });
   }
 
-  getCurrentLocation() {
+  private getCurrentLocation() {
 
     this.loading2 = this.loadingCtrl.create({
-      content: 'Saving Location ...'
+      content: 'Saving Location ...',
+      //dismissOnPageChange: true
     });
 
     this.loading2.present();
@@ -69,7 +72,7 @@ export class OfferPage {
     });
   }
 
-  onSubmit(formValues, formValid) {
+  private onSubmit(formValues, formValid) {
 
     if (!formValid)
       return;
@@ -87,7 +90,8 @@ export class OfferPage {
 
     //for form submit
     this.loading = this.loadingCtrl.create({
-      content: 'Listing ...'
+      content: 'Listing ...',
+      //dismissOnPageChange: true
     });
 
     this.loading.present().then(() => {
@@ -138,7 +142,7 @@ export class OfferPage {
     });
   }
 
-  selectFromGallery(form) {
+  private selectFromGallery(form) {
     var options = {
       sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
       destinationType: this.camera.DestinationType.DATA_URL
@@ -153,7 +157,7 @@ export class OfferPage {
     });
   }
 
-  openCamera(form) {
+  private openCamera(form) {
     var options = {
       sourceType: this.camera.PictureSourceType.CAMERA,
       destinationType: this.camera.DestinationType.DATA_URL
@@ -169,7 +173,19 @@ export class OfferPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad OfferPage');
+    this.ga.trackView('Offer Page');
+
+    this.userSub$ = this.userService.user$.subscribe(
+      user => {
+        this.user = user;
+        this.userOffers = this.db.list('users/' + this.user.$key + '/offers');
+      },
+      err => console.error(err)
+    );
+  }
+
+  ionViewWillUnload () {
+    this.userSub$.unsubscribe();
   }
 
 }

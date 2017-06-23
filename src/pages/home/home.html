@@ -3,7 +3,7 @@
     <img style="width:60%; margin:auto" src="assets/logos/circles.png" />
     <ion-card-content>
       <ion-card-title>
-        Welcome To Circles {{user.firstName || user.organisation}}
+        Welcome To Circles {{user?.firstName || user?.organisation}}
       </ion-card-title>
       <p>
         This is a test version of the Circles app. If you have any questions or find a bug please report it. Either email us @ <a href="mailto:basicincomeberlin@gmail.com?subject='Bug Report'">BasicIncomeBerlin@gmail.com</a> or use the report function
@@ -14,18 +14,18 @@
       <ion-col>
         <button ion-button icon-left clear small>
           <ion-icon name="cash"></ion-icon>
-          <div (click)="cd()">Balance</div>
+          <div>Balance</div>
         </button>
       </ion-col>
       <ion-col center text-center>
         <button ion-button clear small>
-          <div>{{user.balance}}</div>
+          <div>{{user?.balance}}</div>
         </button>
       </ion-col>
     </ion-row>
   </ion-card>
 
-  <div *ngFor="let newsItem of newsService.allNewsItemsReversed | async ">
+  <div *ngFor="let newsItem of newsService.allnewsItemsReversed$ | async ">
 
       <news-card [newsItem]="newsItem"></news-card>
 

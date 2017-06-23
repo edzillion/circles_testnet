@@ -18,6 +18,7 @@ export class KeyToUserPipe implements PipeTransform {
   }
 
   transform(key: string): Observable<any> {
+    console.log('KeyToUserPipe called');
     return this.db.object('/users/'+key).take(1);
   }
 }

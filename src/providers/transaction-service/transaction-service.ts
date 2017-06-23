@@ -1,36 +1,39 @@
-import { Injectable } from '@angular/core';
-import 'rxjs/add/operator/map';
+import { Injectable, OnDestroy } from '@angular/core';
 
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-
+import * as firebase from 'firebase/app';
 import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
+import 'rxjs/add/operator/map';
 
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
 
-import * as firebase from 'firebase/app';
-
 @Injectable()
-export class TransactionService {
+export class TransactionService implements OnDestroy {
 
   public transact: Subject<any> = new Subject<any>();
 
   private user: any;
-  private transactionLog: FirebaseListObservable<any>;
+  private userSub$: Subscription;
+  private transactionLog$: FirebaseListObservable<any>;
 
-  constructor(private userService: UserService, private newsService: NewsService, private db: AngularFireDatabase) {
+  constructor(
+    private userService: UserService,
+    private newsService: NewsService,
+    private db: AngularFireDatabase
+  ) {
 
-    userService.userSubject.subscribe(
+    this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
       err => console.error(err),
       () => {}
     );
 
-    this.transactionLog = db.list('/transactions/');
+    this.transactionLog$ = this.db.list('/transactions/');
   }
 
-
-  transfer(toUser, amount) {
+  private transfer(toUser, amount) {
     let myBalance: number = +this.user.balance;
     let toUserBalance: number = +toUser.balance;
     let txAmount: number = +amount;
@@ -45,7 +48,7 @@ export class TransactionService {
     return true;
   }
 
-  logTransfer(toUser, offer, type, message?) {
+  private logTransfer(toUser, offer, type, message?) {
 
     let logItem = {
       "from" : this.user.$key,
@@ -58,7 +61,7 @@ export class TransactionService {
     };
 
     //add to the main transaction log
-    this.transactionLog.push(logItem);
+    this.transactionLog$.push(logItem);
 
     //add to other user's log
     logItem.to = '';
@@ -69,9 +72,10 @@ export class TransactionService {
     toUserLog.push(logItem);
   }
 
-  createPurchaseIntent(sellerUserId, offer) {
+  public createPurchaseIntent(sellerUserId, offer) {
     let p = new Promise( (resolve, reject) => {
-      this.userService.keyToUser(sellerUserId).subscribe( (sellerUser) => {
+      this.userService.keyToUser$(sellerUserId).take(1).subscribe( (sellerUser) => {
+        debugger;
         if (this.transfer(sellerUser, offer.price)) {
           this.logTransfer(sellerUser, offer, 'purchase');
           this.newsService.addPurchase(offer);
@@ -85,9 +89,9 @@ export class TransactionService {
     return p;
   }
 
-  createTransactionIntent(toUserId:string, amount:number, message?:string) {
+  public createTransactionIntent(toUserId:string, amount:number, message?:string) {
     let p = new Promise( (resolve, reject) => {
-      this.userService.keyToUser(toUserId).subscribe( (toUser) => {
+      this.userService.keyToUser$(toUserId).take(1).subscribe( (toUser) => {
         if(this.transfer(toUser, amount)) {
           let offerObj = {
             amount: amount,
@@ -107,4 +111,9 @@ export class TransactionService {
 
     return p;
   }
+
+  ngOnDestroy() {
+    this.userSub$.unsubscribe();
+  }
+
 }

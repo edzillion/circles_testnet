@@ -1,14 +1,13 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, LoadingController, NavParams } from 'ionic-angular';
-import { AngularFireModule } from 'angularfire2';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { IonicPage, Loading, LoadingController, NavParams, NavController } from 'ionic-angular';
+import { GoogleAnalytics } from '@ionic-native/google-analytics';
 
 import { Observable } from 'rxjs/Observable';
+import * as firebase from 'firebase/app';
 
 import { LoginEmailPage } from '../../pages/login-email/login-email';
 import { SignupEmailPage } from '../../pages/signup-email/signup-email';
-
-import * as firebase from 'firebase/app';
+import { UserService } from '../../providers/user-service/user-service';
 
 @IonicPage()
 @Component({
@@ -17,20 +16,26 @@ import * as firebase from 'firebase/app';
 })
 export class LoginPage {
 
-  loading: any;
-  user: Observable<firebase.User>;
+  private loading: Loading;
 
-  constructor(private navCtrl: NavController, public af: AngularFireModule, public afAuth: AngularFireAuth, public loadingCtrl: LoadingController, public navParams: NavParams) {
+  constructor(
+    private navCtrl: NavController,
+    private userService: UserService,
+    private loadingCtrl: LoadingController,
+    private ga: GoogleAnalytics
+  ) {
+
     this.loading = this.loadingCtrl.create({
-      content: 'Please wait...'
+      content: 'Please wait...',
+      //dismissOnPageChange: true
     });
   }
 
-  loginFb() {
+  private loginFb() {
 
     this.loading.present();
 
-    this.afAuth.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
+    this.userService.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
     .then(
       (success) => {
         console.log('fb auth success');
@@ -41,9 +46,9 @@ export class LoginPage {
       });
   }
 
-  loginGoogle() {
+  private loginGoogle() {
     this.loading.present();
-    this.afAuth.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    this.userService.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .then(
       (success) => {
         console.log('google auth success');
@@ -54,18 +59,16 @@ export class LoginPage {
       });
   }
 
-  loginEmail() {
+  private loginEmail() {
     this.navCtrl.push(LoginEmailPage);
   }
 
-  goSignup() {
+  private goSignup() {
     this.navCtrl.push(SignupEmailPage);
   }
 
-
   ionViewDidLoad() {
-    console.log('ionViewDidLoad LoginPage');
-    //this.ga.trackView('Login Page');
+    this.ga.trackView('Login Page');
   }
 
 }

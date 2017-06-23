@@ -1,6 +1,6 @@
 <ion-content padding>
-  <div *ngFor="let group of groups| async; let i = index">
+  <div *ngFor="let group of groups$ | async; let i = index">
     <!-- [height]="contentHeight" -->
-    <group-card [id]="'groupCard' + i" [group]="group" [requirements]="allRequirements"></group-card>
+    <group-card [id]="'groupCard' + i" [group]="group" [requirements]="allRequirements$"></group-card>
   </div>
 </ion-content>

@@ -1,70 +1,69 @@
 import { Component, ViewChild } from '@angular/core';
-import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Content , IonicPage, NavController, NavParams } from 'ionic-angular';
+import { GoogleAnalytics } from '@ionic-native/google-analytics';
 
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
+import { Subscription } from 'rxjs/Subscription';
 
 import { UserService } from '../../providers/user-service/user-service';
 
 @IonicPage()
 @Component({
   selector: 'page-groups',
-  templateUrl: 'groups.html',
-  animations: [
-    trigger('groupState', [
-      state('inactive', style({
-        color: '#eee'
-      })),
-      state('active',   style({
-        color: '#cfd8dc'
-      })),
-      transition('inactive => active', animate('100ms ease-in')),
-      transition('active => inactive', animate('100ms ease-out'))
-    ])
-  ]
+  templateUrl: 'groups.html'
 })
 
 export class GroupsPage {
 
   @ViewChild(Content) content: Content;
 
-  private groups: FirebaseListObservable<any>;
-  private allRequirements: FirebaseListObservable<any>;
   private user: any;
+  private userSub$: Subscription;
 
-  contentHeight: number;
+  private groups$: FirebaseListObservable<any>;
+  private allRequirements$: FirebaseListObservable<any>;
 
-  constructor(private userService: UserService, private db: AngularFireDatabase, public navCtrl: NavController, public navParams: NavParams) {
+  private contentHeight: number;
 
-    userService.userSubject.subscribe(
+  constructor(
+    private userService: UserService,
+    private db: AngularFireDatabase,
+    private ga: GoogleAnalytics
+  ) { }
+
+  private enterGroup(group,elementIndex) {
+    group.state = 'active';
+    this.scrollToElem('groupCard'+elementIndex);
+    this.contentHeight = this.content.contentHeight -76;
+  }
+
+  private scrollToElem(elementId:string) {
+    let yOffset = document.getElementById(elementId).offsetTop;
+    this.content.scrollTo(0, yOffset, 500);
+  }
+
+  ionViewDidLoad() {
+
+    this.ga.trackView('Groups Page');
+
+    this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
       err => console.error(err),
       () => {}
     );
 
-    this.groups = db.list('/groups/')
+    this.groups$ = this.db.list('/groups/')
       .map( groups => {
         for (let group of groups)
           group.state = 'inactive';
         return groups;
       }) as FirebaseListObservable<any>;
 
-    this.allRequirements = db.list('static/groupRequirements')
+    this.allRequirements$ = this.db.list('static/groupRequirements');
   }
 
-  enterGroup(group,elementIndex) {
-    group.state = 'active';
-    this.scrollToElem('groupCard'+elementIndex);
-    this.contentHeight = this.content.contentHeight -76;
-  }
-
-  scrollToElem(elementId:string) {
-    let yOffset = document.getElementById(elementId).offsetTop;
-    this.content.scrollTo(0, yOffset, 500);
-  }
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad GroupsPage');
+  ionViewWillUnload () {
+    this.userSub$.unsubscribe();
   }
 
 }

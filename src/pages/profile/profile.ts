@@ -1,16 +1,14 @@
+import { IonicPage, NavController, NavParams, Slides, LoadingController } from 'ionic-angular';
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-
-import { IonicPage, NavController, NavParams, Slides, LoadingController } from 'ionic-angular';
-
 import { Camera } from '@ionic-native/camera';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 
-import { TabsPage } from '../tabs/tabs';
-
 import { AngularFireDatabase } from 'angularfire2/database';
 import * as firebase from 'firebase';
+
+import { TabsPage } from '../tabs/tabs';
 
 @IonicPage()
 @Component({
@@ -27,12 +25,12 @@ export class ProfilePage {
 
   @ViewChild(Slides) profileSlider: Slides;
 
-  formGroups: Array<FormGroup>;
-  userTypeForm: FormGroup;
-  individualForm: FormGroup;
-  organisationForm: FormGroup;
-  picForm: FormGroup;
-  confirmForm: FormGroup;
+  private formGroups: Array<FormGroup>;
+  private userTypeForm: FormGroup;
+  private individualForm: FormGroup;
+  private organisationForm: FormGroup;
+  private picForm: FormGroup;
+  private confirmForm: FormGroup;
 
   private formState = {
     type: <string>null,
@@ -43,8 +41,8 @@ export class ProfilePage {
   };
 
   //todo: move literals
-  profilePageViewNames: Array<string> = ['Intro', 'User Type', 'User Info', 'Picture', 'Confirm'];
-  weeklyGrant: number = 100;
+  private profilePageViewNames: Array<string> = ['Intro', 'User Type', 'User Info', 'Picture', 'Confirm'];
+  private weeklyGrant: number = 100;
 
   constructor(
     private ga: GoogleAnalytics,
@@ -58,7 +56,8 @@ export class ProfilePage {
   ) {
 
     this.formState.loading = this.loadingCtrl.create({
-      content: 'Saving Profile ...'
+      content: 'Saving Profile ...',
+      //dismissOnPageChange: true
     });
 
     this.userTypeForm = formBuilder.group({
@@ -97,17 +96,15 @@ export class ProfilePage {
     }
     else { //user object, therfore we are refilling out profile form
       this.formState.refilling = true;
-      //this.user.subscribe( (user) => {
-        this.UID =  this.user.$key;
-        this.user = this.user;
-        this.balance = this.user.balance;
-        this.createdAt = this.user.createdAt;
-        this.initialiseFormFields(this.user);
-      //});
+      this.UID =  this.user.$key;
+      this.user = this.user;
+      this.balance = this.user.balance;
+      this.createdAt = this.user.createdAt;
+      this.initialiseFormFields(this.user);
     }
   }
 
-  initialiseFormFields(user) {
+  private initialiseFormFields(user) {
 
     if (user.type)
       this.userTypeForm.patchValue({ type: user.type });
@@ -136,20 +133,19 @@ export class ProfilePage {
     }
   }
 
-
-  onFirstSlideSubmit() {
+  private onFirstSlideSubmit() {
     if(this.userTypeForm.controls.type.value)
       this.setUserTypeSlides();
     this.profileSlider.slideNext();
   }
 
-  onSecondSlideSubmit() {
+  private onSecondSlideSubmit() {
     this.setUserTypeSlides();
     this.profileSlider.lockSwipeToNext(false);
     this.profileSlider.slideNext();
   }
 
-  onSubmit(formValues, formValid) {
+  private onSubmit(formValues, formValid) {
     if (!formValid)
       return;
 
@@ -158,7 +154,7 @@ export class ProfilePage {
   }
 
 
-  setUserTypeSlides() {
+  private setUserTypeSlides() {
 
     this.formState.type = this.userTypeForm.controls.type.value;
 
@@ -177,7 +173,7 @@ export class ProfilePage {
     this.formGroups[3] = this.picForm;
   }
 
-  onSlideWillChange() {
+  private onSlideWillChange() {
     // this returns the slide we are going to
     let i = this.profileSlider.getActiveIndex();
 
@@ -189,11 +185,11 @@ export class ProfilePage {
 
   }
 
-  onSlideDidChange() {
+  private onSlideDidChange() {
     //add tracking here
   }
 
-  selectFromGallery(form) {
+  private selectFromGallery(form) {
     var options = {
       sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
       destinationType: this.camera.DestinationType.DATA_URL
@@ -208,7 +204,7 @@ export class ProfilePage {
     });
   }
 
-  openCamera(form) {
+  private openCamera(form) {
     var options = {
       sourceType: this.camera.PictureSourceType.CAMERA,
       destinationType: this.camera.DestinationType.DATA_URL
@@ -223,7 +219,7 @@ export class ProfilePage {
     });
   }
 
-  setInitialBalance() {
+  private setInitialBalance() {
     var now = new Date(),
       day = now.getDay();
     var diff = (7 - 5 + day) % 7;
@@ -231,7 +227,7 @@ export class ProfilePage {
     return Math.round(b);
   }
 
-  saveForm() {
+  private saveForm() {
     this.user = {};
     this.user.type = this.formState.type;
 
@@ -332,7 +328,6 @@ export class ProfilePage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad ProfilePage');
     this.ga.trackView('Profile Page');
   }
 

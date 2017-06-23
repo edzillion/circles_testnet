@@ -6,7 +6,7 @@ import 'rxjs/add/operator/map';
 
 @Pipe({
   name: 'keytousername',
-  pure: false
+  pure: true
 })
 export class KeyToUserNamePipe implements PipeTransform {
 
@@ -14,7 +14,7 @@ export class KeyToUserNamePipe implements PipeTransform {
   }
 
   transform(key: string): Observable<any> {
-
+    console.log('KeyToUserNamePipe called');
     return this.db.object('/users/'+key).map( user => user.displayName);
   }
 }
