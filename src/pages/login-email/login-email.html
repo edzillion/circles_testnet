@@ -15,7 +15,7 @@
   </ion-row>
   <ion-row>
     <ion-col>
-      <form [formGroup]="_loginForm" (ngSubmit)="onSubmit(_loginForm.value, _loginForm.valid)">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit(loginForm.value, loginForm.valid)">
         <ion-list>
           <ion-list-header>
             Enter your credentials below
@@ -34,7 +34,7 @@
             </ion-item>
 
             <ion-item-divider>
-              <button ion-button [disabled]="!_loginForm.valid" type="submit">Log In</button>
+              <button ion-button [disabled]="!loginForm.valid" type="submit">Log In</button>
             </ion-item-divider>
 
           </ion-list>

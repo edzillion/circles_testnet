@@ -16,6 +16,7 @@ export class TransactionService implements OnDestroy {
 
   private user: any;
   private userSub$: Subscription;
+  private toUserLog$: FirebaseListObservable<any>;
   private transactionLog$: FirebaseListObservable<any>;
 
   constructor(
@@ -68,8 +69,8 @@ export class TransactionService implements OnDestroy {
     if (logItem.type == 'purchase')
       logItem.type = 'sale';
 
-    let toUserLog = this.db.list('/users/'+toUser.$key+'/log/');
-    toUserLog.push(logItem);
+    this.toUserLog$ = this.db.list('/users/'+toUser.$key+'/log/');
+    this.toUserLog$.push(logItem);
   }
 
   public createPurchaseIntent(sellerUserId, offer) {
@@ -113,6 +114,7 @@ export class TransactionService implements OnDestroy {
 
   ngOnDestroy() {
     this.userSub$.unsubscribe();
+    this.toUserLog$.subscribe().unsubscribe();
   }
 
 }
