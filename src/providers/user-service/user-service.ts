@@ -41,7 +41,7 @@ export class UserService implements OnDestroy {
           let userSub = this.db.object('/users/' + auth.uid).subscribe(
             user => {
               if (user.$exists()) {
-
+                debugger;
                 // at this point the user has a login and has a user profile.
                 // set up this service's user subscrioption and then called
                 // this.initSubject.next(false); to end the initialisation process
@@ -66,7 +66,7 @@ export class UserService implements OnDestroy {
                   error => console.log('Could not load users.')
                 );
 
-                this.initSubject$.next(false);
+                this.initSubject$.next(null);
               }
               else {
                 this.initSubject$.next(auth);
@@ -79,7 +79,51 @@ export class UserService implements OnDestroy {
       },
       err => console.error(err),
       () => {}
-    )
+    );
+
+    // Sign in with redirect:
+    //.signInWithRedirect(provider)
+    ////////////////////////////////////////////////////////////
+    // The user is redirected to the provider's sign in flow...
+    ////////////////////////////////////////////////////////////
+    // Then redirected back to the app, where we check the redirect result:
+    // this.auth.getRedirectResult().then(
+    //
+    //   //todo: why is this returning immediately?
+    //   result => {
+    //     debugger;
+    //     if (!user)
+    //       return;
+    //     // The firebase.User instance:
+    //     var user = result.user;
+    //     // The Facebook firebase.auth.AuthCredential containing the Facebook
+    //     // access token:
+    //     var credential = result.credential;
+    //     // As this API can be used for sign-in, linking and reauthentication,
+    //     // check the operationType to determine what triggered this redirect
+    //     // operation.
+    //     var operationType = result.operationType;
+    //     debugger;
+    //
+    //   },
+    //   error => {
+    //     // The provider's account email, can be used in case of
+    //     // auth/account-exists-with-different-credential to fetch the providers
+    //     // linked to the email:
+    //     var email = error.email;
+    //     // The provider's credential:
+    //     var credential = error.credential;
+    //     // In case of auth/account-exists-with-different-credential error,
+    //     // you can fetch the providers using this:
+    //     if (error.code === 'auth/account-exists-with-different-credential') {
+    //       this.auth.fetchProvidersForEmail(email).then(function(providers) {
+    //         // The returned 'providers' is a list of the available providers
+    //         // linked to the email address. Please refer to the guide for a more
+    //         // complete explanation on how to recover from this error.
+    //       });
+    //     }
+    //   }
+    // );
   }
 
   public keyToUser$(key: string): Observable<any> {

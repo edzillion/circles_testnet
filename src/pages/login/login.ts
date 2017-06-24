@@ -17,6 +17,7 @@ import { UserService } from '../../providers/user-service/user-service';
 export class LoginPage {
 
   private loading: Loading;
+  private loading2: Loading;
 
   constructor(
     private navCtrl: NavController,
@@ -25,38 +26,30 @@ export class LoginPage {
     private analytics: AnalyticsService
   ) {
 
-    this.loading = this.loadingCtrl.create({
-      content: 'Please wait...',
-      //dismissOnPageChange: true
-    });
   }
 
-  private loginFb() {
+  private loginFB() {
 
+    this.loading = this.loadingCtrl.create({
+      content: 'Logging in ...',
+      dismissOnPageChange: true,
+    });
     this.loading.present();
 
-    this.userService.auth.signInWithPopup(new firebase.auth.FacebookAuthProvider())
-    .then(
-      (success) => {
-        console.log('fb auth success');
-        this.loading.dismiss();
-      }).catch(
-      (err) => {
-        console.error(err);
-      });
+    var provider = new firebase.auth.FacebookAuthProvider();
+    provider.addScope('public_profile');
+    provider.addScope('email');
+
+    this.userService.auth.signInWithRedirect(provider);
   }
 
   private loginGoogle() {
-    this.loading.present();
-    this.userService.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .then(
-      (success) => {
-        console.log('google auth success');
-        this.loading.dismiss();
-      }).catch(
-      (err) => {
-        console.error(err);
-      });
+    this.loading = this.loadingCtrl.create({
+      content: 'Logging in ...',
+      dismissOnPageChange: true
+    });
+    var provider = new firebase.auth.GoogleAuthProvider();
+    this.userService.auth.signInWithRedirect(provider);
   }
 
   private loginEmail() {

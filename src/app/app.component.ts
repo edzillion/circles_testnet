@@ -59,7 +59,10 @@ export class MyApp implements OnDestroy {
           },
           err => console.error(err),
           () => { }
-        )
+        );
+
+    
+
       });
   }
 
