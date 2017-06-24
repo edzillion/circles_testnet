@@ -329,6 +329,8 @@ export class ProfilePage {
 
   ionViewDidLoad() {
     this.ga.trackView('Profile Page');
+    //we don't want to allow swiping across two slides
+    this.profileSlider.longSwipes = false;
   }
 
 }

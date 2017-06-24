@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
-import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
+import { NotificationsService } from 'angular2-notifications';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import * as firebase from 'firebase/app';
 import { Subscription } from 'rxjs/Subscription';
@@ -8,7 +8,6 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/combineLatest';
 
-import { PipesModule } from '../../pipes/pipes';
 import { UserService } from '../../providers/user-service/user-service';
 
 @Injectable()

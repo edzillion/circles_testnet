@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, Loading, LoadingController, NavParams } from 'ionic-angular';
+import { IonicPage, Loading, LoadingController } from 'ionic-angular';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { FormBuilder, FormGroup, FormControl, Validators, } from '@angular/forms';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
@@ -36,9 +36,7 @@ export class SendPage {
     private notificationsService: NotificationsService,
     private ga: GoogleAnalytics,
     private loadingCtrl: LoadingController,
-    private formBuilder: FormBuilder,
-    private db: AngularFireDatabase,
-    private navParams: NavParams
+    private formBuilder: FormBuilder
   ) {
 
     this.searchControl = new FormControl();

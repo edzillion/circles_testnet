@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
 
-import { AngularFireDatabase, FirebaseObjectObservable } from 'angularfire2/database';
+import { AngularFireDatabase } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -29,16 +29,13 @@ export class UserService implements OnDestroy {
 
   private user: any;
 
-  private dataStore: { users: Array<any> } = { users: [] };
-
   constructor(
     private afAuth: AngularFireAuth,
-    private db: AngularFireDatabase,
-    @Inject( APP_CONFIG ) private config: IAppConfig
+    private db: AngularFireDatabase
   ) {
 
-    this.auth = afAuth.auth;
-    this.authSub$ = afAuth.authState.subscribe(
+    this.auth = this.afAuth.auth;
+    this.authSub$ = this.afAuth.authState.subscribe(
       auth => {
         if (auth) {
           let userSub = this.db.object('/users/' + auth.uid).subscribe(
