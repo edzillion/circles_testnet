@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
 import { IonicPage, NavParams, ModalController } from 'ionic-angular';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { Subscription } from 'rxjs/Subscription';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
@@ -25,11 +25,11 @@ export class HomePage {
   constructor(
     private userService: UserService,
     private newsService: NewsService,
-    private ga: GoogleAnalytics
+    private analytics: AnalyticsService
   ) { }
 
   ionViewDidLoad() {
-    this.ga.trackView('Home Page');
+    this.analytics.trackPageView('Home Page');
 
     this.userSub$ = this.userService.user$.subscribe(
       user => {

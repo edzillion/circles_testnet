@@ -3,7 +3,7 @@ import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Camera } from '@ionic-native/camera';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { AngularFireDatabase } from 'angularfire2/database';
 import * as firebase from 'firebase';
@@ -45,7 +45,7 @@ export class ProfilePage {
   private weeklyGrant: number = 100;
 
   constructor(
-    private ga: GoogleAnalytics,
+    private analytics: AnalyticsService,
     private ds: DomSanitizer,
     private db: AngularFireDatabase,
     private camera: Camera,
@@ -328,7 +328,7 @@ export class ProfilePage {
   }
 
   ionViewDidLoad() {
-    this.ga.trackView('Profile Page');
+    this.analytics.trackPageView('Profile Page');
     //we don't want to allow swiping across two slides
     this.profileSlider.longSwipes = false;
   }

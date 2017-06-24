@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavParams, ViewController, Loading, LoadingController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { Subscription } from 'rxjs/Subscription';
 import { NotificationsService } from 'angular2-notifications';
@@ -35,7 +35,7 @@ export class PurchaseModal {
     private loadingCtrl: LoadingController,
     private navParams: NavParams,
     private viewCtrl: ViewController,
-    private ga: GoogleAnalytics
+    private analytics: AnalyticsService
   ) {
 
     this.offer = navParams.get('offer');
@@ -86,7 +86,7 @@ export class PurchaseModal {
   }
 
   ionViewDidLoad() {
-    this.ga.trackView('Purchase Modal');
+    this.analytics.trackPageView('Purchase Modal');
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,

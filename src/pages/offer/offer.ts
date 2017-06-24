@@ -3,7 +3,7 @@ import { IonicPage, Loading, LoadingController, NavParams } from 'ionic-angular'
 import { FormBuilder, FormGroup, Validators, } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Camera } from '@ionic-native/camera';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 import { Geolocation } from '@ionic-native/geolocation';
 
 import { Subscription } from 'rxjs/Subscription';
@@ -35,7 +35,7 @@ export class OfferPage {
     private ds: DomSanitizer,
     private geo: Geolocation,
     private camera: Camera,
-    private ga: GoogleAnalytics,
+    private analytics: AnalyticsService,
     private loadingCtrl: LoadingController,
     private formBuilder: FormBuilder,
     private db: AngularFireDatabase
@@ -173,7 +173,7 @@ export class OfferPage {
   }
 
   ionViewDidLoad() {
-    this.ga.trackView('Offer Page');
+    this.analytics.trackPageView('Offer Page');
 
     this.userSub$ = this.userService.user$.subscribe(
       user => {

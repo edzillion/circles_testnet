@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, Loading, LoadingController } from 'ionic-angular';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { AngularFireAuth } from 'angularfire2/auth';
 
@@ -23,7 +23,7 @@ export class SignupEmailPage {
     private loadingCtrl: LoadingController,
     private formBuilder: FormBuilder,
     private userService: UserService,
-    private ga: GoogleAnalytics
+    private analytics: AnalyticsService
   ) {
 
     this.createUserForm = formBuilder.group({
@@ -67,7 +67,7 @@ export class SignupEmailPage {
   }
 
   ionViewDidLoad() {
-    this.ga.trackView('Signup Email Page');
+    this.analytics.trackPageView('Signup Email Page');
   }
 
 }

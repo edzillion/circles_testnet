@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { IonicPage, Loading, LoadingController } from 'ionic-angular';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { FormBuilder, FormGroup, FormControl, Validators, } from '@angular/forms';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { Subscription } from 'rxjs/Subscription';
 import { NotificationsService } from 'angular2-notifications';
@@ -34,7 +34,7 @@ export class SendPage {
     private userService: UserService,
     private transactionService: TransactionService,
     private notificationsService: NotificationsService,
-    private ga: GoogleAnalytics,
+    private analytics: AnalyticsService,
     private loadingCtrl: LoadingController,
     private formBuilder: FormBuilder
   ) {
@@ -92,7 +92,7 @@ export class SendPage {
   }
 
   ionViewDidLoad() {
-    this.ga.trackView('Send Page');
+    this.analytics.trackPageView('Send Page');
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,

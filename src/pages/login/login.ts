@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, Loading, LoadingController, NavParams, NavController } from 'ionic-angular';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase/app';
@@ -22,7 +22,7 @@ export class LoginPage {
     private navCtrl: NavController,
     private userService: UserService,
     private loadingCtrl: LoadingController,
-    private ga: GoogleAnalytics
+    private analytics: AnalyticsService
   ) {
 
     this.loading = this.loadingCtrl.create({
@@ -68,7 +68,7 @@ export class LoginPage {
   }
 
   ionViewDidLoad() {
-    this.ga.trackView('Login Page');
+    this.analytics.trackPageView('Login Page');
   }
 
 }

@@ -27,6 +27,7 @@ import { PurchaseModalModule } from '../pages/purchase-modal/purchase-modal.modu
 import { UserService } from '../providers/user-service/user-service';
 import { TransactionService } from '../providers/transaction-service/transaction-service';
 import { NewsService } from '../providers/news-service/news-service';
+import { AnalyticsService } from '../providers/analytics-service/analytics-service';
 
 import { NewsCardModule } from '../components/news-card/news-card.module';
 import { GroupCardModule } from '../components/group-card/group-card.module';
@@ -88,7 +89,8 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
     {provide: APP_CONFIG, useValue: APP_DI_CONFIG},
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     NewsService,
-    UserService
+    UserService,
+    AnalyticsService
   ]
 })
 export class AppModule {}

@@ -2,7 +2,7 @@ import { Component, OnDestroy, NgZone, ViewChild } from '@angular/core';
 import { AlertController, Loading, LoadingController, Events, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../providers/analytics-service/analytics-service';
 
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
@@ -13,14 +13,12 @@ import { LoginPage } from '../pages/login/login';
 import { ProfilePage } from '../pages/profile/profile';
 import { UserService } from '../providers/user-service/user-service';
 
-import { environment } from '../environments/environment';
-
 @Component({
   templateUrl: 'app.html'
 })
 export class MyApp implements OnDestroy {
 
-  private rootPage =  LoginPage;
+  private rootPage = LoginPage;
   @ViewChild('content') nav;
 
   private loading: Loading;
@@ -40,7 +38,7 @@ export class MyApp implements OnDestroy {
     private platform: Platform,
     private statusBar: StatusBar,
     private splashScreen: SplashScreen,
-    private ga: GoogleAnalytics,
+    private analytics: AnalyticsService,
     private loadingCtrl: LoadingController
   ) {
 
@@ -48,11 +46,8 @@ export class MyApp implements OnDestroy {
       .then(() => {
 
         if (this.platform.is('cordova')) {
-          this.ga.startTrackerWithId(environment.googleAnalytics.id);
-        } else {
-          // Cordova not accessible, add mock data if necessary
-        }
 
+        }
         statusBar.styleDefault();
         this.initSub$ = this.userService.initSubject$.subscribe(
           noProfile => {
@@ -83,8 +78,8 @@ export class MyApp implements OnDestroy {
         {
           text: 'OK',
           handler: () => {
-            this.userService.user$.take(1).subscribe( user => {
-              this.nav.setRoot(ProfilePage, {user: user});
+            this.userService.user$.take(1).subscribe(user => {
+              this.nav.setRoot(ProfilePage, { user: user });
             });
           }
         }
@@ -103,7 +98,7 @@ export class MyApp implements OnDestroy {
     });
   }
 
-  ngOnDestroy () {
+  ngOnDestroy() {
 
     this.initSub$.unsubscribe();
   }

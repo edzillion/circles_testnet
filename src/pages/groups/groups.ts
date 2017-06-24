@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { Content , IonicPage } from 'ionic-angular';
-import { GoogleAnalytics } from '@ionic-native/google-analytics';
+import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import { Subscription } from 'rxjs/Subscription';
@@ -28,7 +28,7 @@ export class GroupsPage {
   constructor(
     private userService: UserService,
     private db: AngularFireDatabase,
-    private ga: GoogleAnalytics
+    private analytics: AnalyticsService
   ) { }
 
   private enterGroup(group,elementIndex) {
@@ -44,7 +44,7 @@ export class GroupsPage {
 
   ionViewDidLoad() {
 
-    this.ga.trackView('Groups Page');
+    this.analytics.trackPageView('Groups Page');
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
