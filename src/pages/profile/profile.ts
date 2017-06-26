@@ -1,4 +1,4 @@
-import { IonicPage, NavController, NavParams, Slides, LoadingController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, Slides, Loading, LoadingController, Toast, ToastController } from 'ionic-angular';
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -17,9 +17,13 @@ import { TabsPage } from '../tabs/tabs';
 })
 export class ProfilePage {
 
+  // not type User because it could be a firebase user or our user object
   private user: any;
-  private balance: any;
-  private createdAt: any;
+
+  private toast: Toast;
+
+  private balance: number;
+  private createdAt: number;
   private UID: string;
   private base64ImageData: string;
 
@@ -36,7 +40,7 @@ export class ProfilePage {
     type: <string>null,
     submitAttempt: <boolean>false,
     profilePicRequired: <boolean>false,
-    loading: <any>{},
+    loading: <Loading>{},
     refilling: <boolean>false
   };
 
@@ -46,13 +50,14 @@ export class ProfilePage {
 
   constructor(
     private analytics: AnalyticsService,
-    private ds: DomSanitizer,
-    private db: AngularFireDatabase,
     private camera: Camera,
+    private db: AngularFireDatabase,
+    private ds: DomSanitizer,
     private formBuilder: FormBuilder,
     private loadingCtrl: LoadingController,
     private navCtrl: NavController,
-    private navParams: NavParams
+    private navParams: NavParams,
+    private toastCtrl: ToastController
   ) {
 
     this.formState.loading = this.loadingCtrl.create({
@@ -61,24 +66,24 @@ export class ProfilePage {
     });
 
     this.userTypeForm = formBuilder.group({
-      type: ['', Validators.required],
+      type: [null, Validators.required],
     });
 
     this.individualForm = formBuilder.group({
-      firstName: ['', Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z ]*'), Validators.required])],
-      lastName: ['', Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z ]*'), Validators.required])],
-      email: ['']
+      firstName: [null, Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z ]*'), Validators.required])],
+      lastName: [null, Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z ]*'), Validators.required])],
+      email: [null, Validators.email]
     });
 
     this.organisationForm = formBuilder.group({
-      organisation: ['', Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z0-9 ]*'), Validators.required])],
-      tagline: ['', Validators.compose([Validators.maxLength(60)])],
-      website: [''],
-      email: ['']
+      organisation: [null, Validators.compose([Validators.maxLength(30), Validators.pattern('[a-zA-Z0-9 ]*'), Validators.required])],
+      tagline: [null, Validators.compose([Validators.maxLength(60)])],
+      website: [null],
+      email: [null, Validators.email]
     });
 
     this.picForm = formBuilder.group({
-      profilePicURL: [''],
+      profilePicURL: [null],
     });
 
     this.confirmForm = formBuilder.group({
@@ -91,12 +96,12 @@ export class ProfilePage {
     this.user = navParams.get('user');
     if (this.user.uid) { //firebase user
       this.formState.refilling = false;
-      this.UID =  this.user.uid;
+      this.UID = this.user.uid;
       this.initialiseFormFields(this.user);
     }
     else { //user object, therfore we are refilling out profile form
       this.formState.refilling = true;
-      this.UID =  this.user.$key;
+      this.UID = this.user.$key;
       this.user = this.user;
       this.balance = this.user.balance;
       this.createdAt = this.user.createdAt;
@@ -104,7 +109,7 @@ export class ProfilePage {
     }
   }
 
-  private initialiseFormFields(user) {
+  private initialiseFormFields(user: any): void {
 
     if (user.type)
       this.userTypeForm.patchValue({ type: user.type });
@@ -134,7 +139,7 @@ export class ProfilePage {
   }
 
   private onFirstSlideSubmit() {
-    if(this.userTypeForm.controls.type.value)
+    if (this.userTypeForm.controls.type.value)
       this.setUserTypeSlides();
     this.profileSlider.slideNext();
   }
@@ -145,7 +150,7 @@ export class ProfilePage {
     this.profileSlider.slideNext();
   }
 
-  private onSubmit(formValues, formValid) {
+  private onSubmit(formData: any, formValid: boolean): void {
     if (!formValid)
       return;
 
@@ -154,7 +159,7 @@ export class ProfilePage {
   }
 
 
-  private setUserTypeSlides() {
+  private setUserTypeSlides(): void {
 
     this.formState.type = this.userTypeForm.controls.type.value;
 
@@ -173,7 +178,7 @@ export class ProfilePage {
     this.formGroups[3] = this.picForm;
   }
 
-  private onSlideWillChange() {
+  private onSlideWillChange(): void {
     // this returns the slide we are going to
     let i = this.profileSlider.getActiveIndex();
 
@@ -185,41 +190,59 @@ export class ProfilePage {
 
   }
 
-  private onSlideDidChange() {
-    //add tracking here
+  private onSlideDidChange(): void {
+    let i = this.profileSlider.getActiveIndex();
+    let slideName = this.profilePageViewNames[i];
+    this.analytics.trackPageView('Profile Page: ' + slideName);
   }
 
-  private selectFromGallery(form) {
+  private selectFromGallery(form: FormGroup): void {
     var options = {
       sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
       destinationType: this.camera.DestinationType.DATA_URL
     };
-    this.camera.getPicture(options).then((imageData) => {
-      // imageData is a base64 encoded string
-      this.base64ImageData = imageData;
-      form.patchValue({ profilePicURL: "data:image/jpeg;base64," + imageData });
-      form.controls.profilePicURL.markAsDirty();
-    }, (err) => {
-      console.log(err);
-    });
+    this.camera.getPicture(options).then(
+      imageData => {
+        // imageData is a base64 encoded string
+        this.base64ImageData = imageData;
+        form.patchValue({ profilePicURL: "data:image/jpeg;base64," + imageData });
+        form.controls.profilePicURL.markAsDirty();
+      },
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error selecting from gallery: ' + error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      });
   }
 
-  private openCamera(form) {
+  private openCamera(form: FormGroup): void {
     var options = {
       sourceType: this.camera.PictureSourceType.CAMERA,
       destinationType: this.camera.DestinationType.DATA_URL
     };
-    this.camera.getPicture(options).then((imageData) => {
-      // imageData is a base64 encoded string
-      this.base64ImageData = imageData;
-      form.patchValue({ profilePicURL: "data:image/jpeg;base64," + imageData });
-      form.controls.profilePicURL.markAsDirty();
-    }, (err) => {
-      console.log(err);
-    });
+    this.camera.getPicture(options).then(
+      imageData => {
+        // imageData is a base64 encoded string
+        this.base64ImageData = imageData;
+        form.patchValue({ profilePicURL: "data:image/jpeg;base64," + imageData });
+        form.controls.profilePicURL.markAsDirty();
+      },
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error opening camera: ' + error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      });
   }
 
-  private setInitialBalance() {
+  private calcInitialBalance(): number {
     var now = new Date(),
       day = now.getDay();
     var diff = (7 - 5 + day) % 7;
@@ -227,7 +250,7 @@ export class ProfilePage {
     return Math.round(b);
   }
 
-  private saveForm() {
+  private saveForm(): void {
     this.user = {};
     this.user.type = this.formState.type;
 
@@ -248,12 +271,12 @@ export class ProfilePage {
     }
 
     if (!this.formState.refilling) {
-      this.user.balance = this.setInitialBalance();
+      this.user.balance = this.calcInitialBalance();
       this.user.createdAt = firebase.database['ServerValue']['TIMESTAMP'];
 
       this.user.log = [{
-        timestamp:this.user.createdAt,
-        type:'createProfile'
+        timestamp: this.user.createdAt,
+        type: 'createProfile'
       }];
     }
     else {
@@ -284,7 +307,13 @@ export class ProfilePage {
             }
           },
           function(error) {
-            console.log(error);
+            this.toast = this.toastCtrl.create({
+              message: 'Error uploading image: ' + error,
+              duration: 3000,
+              position: 'middle'
+            });
+            console.error(error);
+            this.toast.present();
           },
           function() {
             // Upload completed successfully, now we can get the download URL
@@ -304,7 +333,16 @@ export class ProfilePage {
               //we don't need to navigate here since our subscription to the user record will fire in app.component
               //this.navCtrl.setRoot(TabsPage, { user: this.user });
             })
-            .catch((err) => { console.log(err) });
+            .catch(
+            error => {
+              this.toast = this.toastCtrl.create({
+                message: 'Error saving user: ' + error,
+                duration: 3000,
+                position: 'middle'
+              });
+              console.error(error);
+              this.toast.present();
+            });
         });
       }
       else {
@@ -312,8 +350,8 @@ export class ProfilePage {
         if (!this.formState.refilling) {
           this.user.profilePicURL = "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgeneric-profile-pic.png?alt=media&token=d151cdb8-115f-483c-b701-e227d52399ef";
         }
-        this.db.object(`users/${this.UID}`).set(this.user)
-          .then((success) => {
+        this.db.object(`users/${this.UID}`).set(this.user).then(
+          success => {
             console.log('userData save success');
             this.formState.loading.dismiss();
 
@@ -321,8 +359,16 @@ export class ProfilePage {
               this.navCtrl.setRoot(TabsPage);
             //we don't need to navigate here since our subscription to the user record will fire in app.component
             //this.navCtrl.setRoot(TabsPage, { user: this.user });
-          })
-          .catch((err) => { console.log(err) });
+          }).catch(
+          error => {
+            this.toast = this.toastCtrl.create({
+              message: 'Error saving user: ' + error,
+              duration: 3000,
+              position: 'middle'
+            });
+            console.error(error);
+            this.toast.present();
+          });
       }
     });
   }

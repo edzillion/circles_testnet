@@ -1,8 +1,11 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Toast, ToastController } from 'ionic-angular';
 
 import { Subscription } from 'rxjs/Subscription';
 
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
+import { NewsItem } from '../../interfaces/news-item-interface';
 
 @Component({
   selector: 'news-card',
@@ -10,14 +13,15 @@ import { UserService } from '../../providers/user-service/user-service';
 })
 export class NewsCard implements OnDestroy, OnInit  {
 
-  @Input('newsItem') newsItem: any;
-  private user: any;
+  @Input('newsItem') newsItem: NewsItem;
+  private user: User;
   private message: string;
   private subject: string;
-
   private userSub$: Subscription;
 
-  constructor(private userService: UserService) {
+  private toast: Toast;
+
+  constructor(private toastCtrl: ToastController, private userService: UserService) {
 
   }
 
@@ -25,8 +29,16 @@ export class NewsCard implements OnDestroy, OnInit  {
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
-      err => console.error(err),
-      () => { }
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error getting user: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      },
+      () => console.log('news-card ngOnInit userSub$ obs complete')
     );
 
     if (this.newsItem.type == 'createProfile') {

@@ -9,17 +9,21 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/combineLatest';
 
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
+import { NewsItem } from '../../interfaces/news-item-interface';
+import { Offer } from '../../interfaces/offer-interface';
+import { Group } from '../../interfaces/group-interface';
 
 @Injectable()
 export class NewsService implements OnDestroy {
 
-  private user: any;
+  private user: User;
 
-  private dbNewsItems$: FirebaseListObservable<any>;
+  private dbNewsItems$: FirebaseListObservable<NewsItem[]>;
   private dbNewsSub$: Subscription;
 
-  private newsItemsReversed$: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
-  private newsItems$: BehaviorSubject<Array<string>> = new BehaviorSubject([]);
+  private newsItemsReversed$: BehaviorSubject<NewsItem[]> = new BehaviorSubject([]);
+  private newsItems$: BehaviorSubject<NewsItem[]> = new BehaviorSubject([]);
 
   constructor(
     private userService: UserService,
@@ -27,18 +31,20 @@ export class NewsService implements OnDestroy {
     private db: AngularFireDatabase
   ) {
 
-    //this needs to make sure we have the user key so we will instead get the Observable and sub to that
     this.userService.user$.take(1).subscribe(
       user => {
         this.user = user;
         this.setupDBQuery(user);
       },
-      err => console.error(err),
-      () => {}
+      error => console.error(error),
+      () => console.log('news-service constructor user$ obs complete')
     );
   }
 
-  private setupDBQuery(user) {
+  private setupDBQuery(user: User):void {
+
+    // sets up a db list binding that will initially return all messages from the last
+    // two minutes and then any added to the list after that.
     this.dbNewsItems$ = this.db.list('/users/' + user.$key + '/log/');
     let twoMinsAgo = Date.now() - 120000;
     this.dbNewsItems$.$ref
@@ -61,24 +67,30 @@ export class NewsService implements OnDestroy {
         }
       });
 
-      this.dbNewsSub$ = this.dbNewsItems$.subscribe( (newsitems) => {
-        let r = newsitems.sort((a,b) => a.timestamp < b.timestamp ? 1 : -1);
-        this.newsItemsReversed$.next(r)
-      });
+      this.dbNewsSub$ = this.dbNewsItems$.subscribe(
+        newsitems => {
+          let r = newsitems.sort((a,b) => a.timestamp < b.timestamp ? 1 : -1);
+          this.newsItemsReversed$.next(r)
+        },
+        error => {
+          console.log("Firebase Error: " + error);
+        },
+        () => console.log('news-service setupDBQuery dbNewsSub$ obs complete')
+      );
 
       this.dbNewsItems$.subscribe(this.newsItems$);
 
   }
 
-  public get allNewsItems$(): BehaviorSubject<any> {
+  public get allNewsItems$(): BehaviorSubject<NewsItem[]> {
     return this.newsItems$;
   }
 
-  public get allnewsItemsReversed$(): BehaviorSubject<any> {
+  public get allnewsItemsReversed$(): BehaviorSubject<NewsItem[]> {
     return this.newsItemsReversed$;
   }
 
-  public addTransaction(txItem) {
+  public addTransaction(txItem: any):void {
     //this will only be called for sending to someone else
     this.notificationsService.create('Send Success','','success');
     let msg = 'Sent ' + txItem.amount + ' Circles to ' + txItem.toUser.displayName;
@@ -93,7 +105,7 @@ export class NewsService implements OnDestroy {
     this.dbNewsItems$.push(newsItem);
   }
 
-  public addPurchase(offer) {
+  public addPurchase(offer: Offer):void {
     this.notificationsService.create('Purchase Success','','success');
     let msg = 'Bought ' + offer.title + ' from '+offer.sellerName+' for '+offer.price+' Circles';
     this.notificationsService.create('Purchase', msg, 'info');
@@ -107,7 +119,7 @@ export class NewsService implements OnDestroy {
     this.dbNewsItems$.push(newsItem);
   }
 
-  public addOfferListed(offer) {
+  public addOfferListed(offer: Offer):void {
     this.notificationsService.create('Listing Success','','success');
     let msg = 'Listed ' + offer.title + ' on market';
     this.notificationsService.create('Listing', msg, 'info');
@@ -120,7 +132,7 @@ export class NewsService implements OnDestroy {
     this.dbNewsItems$.push(newsItem);
   }
 
-  public addGroupJoin(group) {
+  public addGroupJoin(group: Group):void {
     this.notificationsService.create('Join Success','','success');
     let msg = 'You have joined the group: ' +group.displayName;
     this.notificationsService.create('Join', msg, 'info');

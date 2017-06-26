@@ -57,7 +57,7 @@ export class MyApp implements OnDestroy {
             else
               this.nav.setRoot(TabsPage, { nav: this.nav });
           },
-          err => console.error(err),
+          error => console.error(error),
           () => { }
         );
 

@@ -8,16 +8,20 @@ import 'rxjs/add/operator/map';
 
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
+import { NewsItem } from '../../interfaces/news-item-interface';
+import { LogItem } from '../../interfaces/log-item-interface';
+import { Offer } from '../../interfaces/offer-interface';
 
 @Injectable()
 export class TransactionService implements OnDestroy {
 
   public transact: Subject<any> = new Subject<any>();
 
-  private user: any;
+  private user: User;
   private userSub$: Subscription;
-  private toUserLog$: FirebaseListObservable<any>;
-  private transactionLog$: FirebaseListObservable<any>;
+  private toUserLog$: FirebaseListObservable<NewsItem[]>;
+  private transactionLog$: FirebaseListObservable<LogItem[]>;
 
   constructor(
     private userService: UserService,
@@ -27,14 +31,14 @@ export class TransactionService implements OnDestroy {
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
-      err => console.error(err),
-      () => {}
+      error => console.error(error),
+      () => console.log('transaction-service constructor userSub$ obs complete')
     );
 
     this.transactionLog$ = this.db.list('/transactions/');
   }
 
-  private transfer(toUser, amount) {
+  private transfer(toUser:User, amount:number): boolean {
     let myBalance: number = +this.user.balance;
     let toUserBalance: number = +toUser.balance;
     let txAmount: number = +amount;
@@ -44,12 +48,13 @@ export class TransactionService implements OnDestroy {
 
     myBalance -= txAmount;
     toUserBalance += txAmount;
+    //todo: add error handling here
     this.db.object('/users/'+this.user.$key).update({balance: myBalance});
     this.db.object('/users/'+toUser.$key).update({balance: toUserBalance});
     return true;
   }
 
-  private logTransfer(toUser, offer, type, message?) {
+  private logTransfer(toUser: User, offer: Offer, type: string, message?: string):void {
 
     let logItem = {
       "from" : this.user.$key,
@@ -73,7 +78,7 @@ export class TransactionService implements OnDestroy {
     this.toUserLog$.push(logItem);
   }
 
-  public createPurchaseIntent(sellerUserId, offer) {
+  public createPurchaseIntent(sellerUserId:string, offer: Offer): Promise<any> {
     let p = new Promise( (resolve, reject) => {
       this.userService.keyToUser$(sellerUserId).take(1).subscribe( (sellerUser) => {
         if (this.transfer(sellerUser, offer.price)) {
@@ -89,7 +94,7 @@ export class TransactionService implements OnDestroy {
     return p;
   }
 
-  public createTransactionIntent(toUserId:string, amount:number, message?:string) {
+  public createTransactionIntent(toUserId:string, amount:number, message?:string): Promise<any> {
     let p = new Promise( (resolve, reject) => {
       this.userService.keyToUser$(toUserId).take(1).subscribe( (toUser) => {
         if(this.transfer(toUser, amount)) {
@@ -100,7 +105,7 @@ export class TransactionService implements OnDestroy {
             to: toUserId,
             toUser: toUser
           };
-          this.logTransfer(toUser, offerObj, 'transfer', message);
+          this.logTransfer(toUser, <any>offerObj, 'transfer', message);
           this.newsService.addTransaction(offerObj);
           resolve(true);
         }

@@ -8,6 +8,7 @@ import * as firebase from 'firebase/app';
 import { LoginEmailPage } from '../../pages/login-email/login-email';
 import { SignupEmailPage } from '../../pages/signup-email/signup-email';
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
 
 @IonicPage()
 @Component({
@@ -20,15 +21,13 @@ export class LoginPage {
   private loading2: Loading;
 
   constructor(
-    private navCtrl: NavController,
-    private userService: UserService,
+    private analytics: AnalyticsService,
     private loadingCtrl: LoadingController,
-    private analytics: AnalyticsService
-  ) {
+    private navCtrl: NavController,
+    private userService: UserService
+  ) { }
 
-  }
-
-  private loginFB() {
+  private loginFB():void {
 
     this.loading = this.loadingCtrl.create({
       content: 'Logging in ...',
@@ -43,7 +42,7 @@ export class LoginPage {
     this.userService.auth.signInWithRedirect(provider);
   }
 
-  private loginGoogle() {
+  private loginGoogle():void {
     this.loading = this.loadingCtrl.create({
       content: 'Logging in ...',
       dismissOnPageChange: true
@@ -52,11 +51,11 @@ export class LoginPage {
     this.userService.auth.signInWithRedirect(provider);
   }
 
-  private loginEmail() {
+  private loginEmail():void {
     this.navCtrl.push(LoginEmailPage);
   }
 
-  private goSignup() {
+  private goSignup():void {
     this.navCtrl.push(SignupEmailPage);
   }
 

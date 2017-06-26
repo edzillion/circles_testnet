@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavParams, ViewController, Loading, LoadingController } from 'ionic-angular';
+import { IonicPage, NavParams, ViewController, Loading, LoadingController, Toast, ToastController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
@@ -8,7 +8,9 @@ import { NotificationsService } from 'angular2-notifications';
 
 import { TransactionService } from '../../providers/transaction-service/transaction-service';
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
 import { NewsService } from '../../providers/news-service/news-service';
+import { Offer } from '../../interfaces/offer-interface';
 
 @IonicPage()
 @Component({
@@ -17,10 +19,10 @@ import { NewsService } from '../../providers/news-service/news-service';
 })
 export class PurchaseModal {
 
-  private offer: any;
-  private user: any;
+  private offer: Offer;
+  private user: User;
   private userSub$: Subscription;
-  private error: any;
+  private toast: Toast;
   private sellerName: string;
 
   private loading: Loading;
@@ -28,32 +30,31 @@ export class PurchaseModal {
   private transactionForm: FormGroup;
 
   constructor(
-    private userService: UserService,
-    private notificationsService: NotificationsService,
-    private transactionService: TransactionService,
+    private analytics: AnalyticsService,
     private formBuilder: FormBuilder,
     private loadingCtrl: LoadingController,
     private navParams: NavParams,
-    private viewCtrl: ViewController,
-    private analytics: AnalyticsService
+    private notificationsService: NotificationsService,
+    private toastCtrl: ToastController,
+    private transactionService: TransactionService,
+    private userService: UserService,
+    private viewCtrl: ViewController
   ) {
 
     this.offer = navParams.get('offer');
 
-
     this.transactionForm = formBuilder.group({
-      to: ['', Validators.required]
+      to: [null, Validators.required]
     });
     this.transactionForm.patchValue({ to: this.offer.seller });
   }
 
-  onSubmit(formValues, formValid) {
+  private onSubmit(formData: any, formValid: boolean): void {
 
     if(!formValid)
       return;
 
     if(this.user.balance < this.offer.price) {
-      this.error = "Not enough circles";
       this.notificationsService.create('Purchase Fail','','error');
       let msg = "You don't have enough Circles!";
       this.notificationsService.create('Balance', msg, 'warn');
@@ -73,15 +74,20 @@ export class PurchaseModal {
       this.loading.dismiss();
       this.closeModal();
     });
-    intent.catch( err => {
-      console.error(err);
-      this.error = err;
+    intent.catch( error => {
+      this.toast = this.toastCtrl.create({
+        message: 'Error Puchase: '+error,
+        duration: 3000,
+        position: 'middle'
+      });
+      console.error(error);
       this.loading.dismiss();
       this.closeModal();
+      this.toast.present();
     });
   }
 
-  closeModal() {
+  private closeModal(): void {
     this.viewCtrl.dismiss(false);
   }
 
@@ -90,8 +96,16 @@ export class PurchaseModal {
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
-      err => console.error(err),
-      () => {}
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error getting user: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      },
+      () => console.log('purchase-modal ionViewDidLoad userSub$ obs complete')
     );
 
     this.userService.keyToUserName$(this.offer.seller).take(1).subscribe( (sellerName) => {

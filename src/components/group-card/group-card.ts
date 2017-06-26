@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
-import { Loading, LoadingController, ModalController } from 'ionic-angular';
+import { Loading, LoadingController, ModalController, Toast, ToastController } from 'ionic-angular';
 
 import { NotificationsService, SimpleNotificationsComponent } from 'angular2-notifications';
 import { Subscription } from 'rxjs/Subscription';
@@ -8,7 +8,10 @@ import 'rxjs/add/operator/take';
 
 import { PurchaseModal } from '../../pages/purchase-modal/purchase-modal'
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
 import { NewsService } from '../../providers/news-service/news-service';
+import { Group } from '../../interfaces/group-interface';
+import { Offer } from '../../interfaces/offer-interface';
 
 @Component({
   selector: 'group-card',
@@ -16,11 +19,11 @@ import { NewsService } from '../../providers/news-service/news-service';
 })
 export class GroupCard implements OnInit, OnDestroy {
 
-  @Input('group') group: any;
+  @Input('group') group: Group;
   @Input('requirements') allRequirements$: FirebaseListObservable<any>;
   @Input('height') contentHeight: number;
 
-  private user: any;
+  private user: User;
   private userSub$: Subscription;
   private groupRequirements$: FirebaseListObservable<any>;
 
@@ -32,41 +35,43 @@ export class GroupCard implements OnInit, OnDestroy {
 
   private active: boolean = false;
 
-  private members: Array<any> = [];
-  private memberSelected: any;
+  private members: Array<User> = [];
+  private memberSelected: User;
 
-  private groupOffers: Array<any> = [];
-  private offerSelected: any;
+  private groupOffers: Array<Offer> = [];
+  private offerSelected: Offer;
   private groupWants: Array<any> = [];
 
   private view: string = 'offers';
   private headerIcon: string = 'arrow-dropdown';
   private loading: Loading;
+  private toast: Toast;
 
   constructor(
+    private db: AngularFireDatabase,
+    private loadingCtrl: LoadingController,
     private newsService: NewsService,
     private userService: UserService,
-    public modalCtrl: ModalController,
-    private db: AngularFireDatabase,
-    private loadingCtrl: LoadingController
+    private modalCtrl: ModalController,
+    private toastCtrl: ToastController
   ) {  }
 
-  private selectMember(member) {
+  private selectMember(member: User):void {
     this.memberSelected = member;
   }
 
-  private selectOffer(offer) {
+  private selectOffer(offer: Offer):void {
     this.offerSelected = offer;
   }
 
-  private buyOffer() {
+  private buyOffer():void {
     let circleModal = this.modalCtrl.create(PurchaseModal, { offer: this.offerSelected });
     circleModal.present().then( (result) => {
       this.offerSelected = null;
     });
   }
 
-  private joinGroup() {
+  private joinGroup():void {
     if (this.allRequirementsMet) {
       if (this.noConfirm) {
         this.loading = this.loadingCtrl.create({
@@ -75,10 +80,21 @@ export class GroupCard implements OnInit, OnDestroy {
         });
         this.loading.present();
         this.group.members.push(this.user.$key);
-        this.db.object('/groups/' + this.group.$key).update({ members: this.group.members }).then( () => {
-          this.newsService.addGroupJoin(this.group);
-          this.loading.dismiss();
-        });
+        this.db.object('/groups/' + this.group.$key).update({ members: this.group.members }).then(
+          () => {
+            this.newsService.addGroupJoin(this.group);
+            this.loading.dismiss();
+          },
+          error => {
+            this.toast = this.toastCtrl.create({
+              message: 'Group update fail: '+error,
+              duration: 3000,
+              position: 'middle'
+            });
+            console.error(error);
+            this.toast.present();
+          }
+        );
       }
       else {
         this.loading = this.loadingCtrl.create({
@@ -93,15 +109,15 @@ export class GroupCard implements OnInit, OnDestroy {
     }
   }
 
-  private selectedOffers() {
+  private selectedOffers():void {
     this.view = 'offers';
   }
 
-  private selectedWants() {
+  private selectedWants():void {
     this.view = 'wants';
   }
 
-  private toggleShowGroup() {
+  private toggleShowGroup():void {
     this.active = !this.active;
     this.headerIcon = (this.active) ? 'arrow-dropup' : 'arrow-dropdown';
   }
@@ -153,8 +169,16 @@ export class GroupCard implements OnInit, OnDestroy {
 
     this.userSub$ = this.userService.user$.subscribe(
       user => this.user = user,
-      err => console.error(err),
-      () => {}
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error getting user: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      },
+      () => console.log('group-card ngOnInit userSub$ obs complete')
     );
 
     this.groupName = this.group.displayName;
@@ -172,11 +196,25 @@ export class GroupCard implements OnInit, OnDestroy {
             }
           }
           else {
+            this.toast = this.toastCtrl.create({
+              message: 'member missing in DB, key:'+member.$key,
+              duration: 3000,
+              position: 'middle'
+            });
+            this.toast.present();
             console.error('member missing in DB, key:', member.$key);
           }
         },
-        err => console.error('firebase error:', err),
-        () => {}
+        error => {
+          this.toast = this.toastCtrl.create({
+            message: 'Failed to get member: '+error,
+            duration: 3000,
+            position: 'middle'
+          });
+          this.toast.present();
+          console.error('Failed to get member:', error)
+        },
+        () => console.log('group-card ngOnInit group.members obs complete')
       )
     });
 

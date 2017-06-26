@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { IonicPage, Loading, LoadingController } from 'ionic-angular';
+import { IonicPage, Loading, LoadingController, Toast, ToastController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { AngularFireAuth } from 'angularfire2/auth';
 
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
 
 @IonicPage()
 @Component({
@@ -16,22 +17,23 @@ export class LoginEmailPage {
 
   private loginForm: FormGroup;
   private loading: Loading;
-  private error: any;
+  private toast: Toast;
 
   constructor(
-    private userService: UserService,
-    private loadingCtrl: LoadingController,
+    private analytics: AnalyticsService,
     private formBuilder: FormBuilder,
-    private analytics: AnalyticsService
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController,
+    private userService: UserService
   ) {
 
     this.loginForm = formBuilder.group({
-      email: ['', Validators.required],
-      password: ['', Validators.required]
+      email: [null,  Validators.compose([Validators.required, Validators.email])],
+      password: [null, Validators.required]
     });
   }
 
-  private onSubmit(formData, formValid) {
+  private onSubmit(formData: any, formValid: boolean): void {
     if (!formValid)
       return;
 
@@ -45,17 +47,21 @@ export class LoginEmailPage {
     this.userService.auth.signInWithEmailAndPassword(
       formData.email,
       formData.password
-    )
-    .then(
-      (success) => {
-      console.log('email auth success');
-      this.loading.dismiss();
-    }).catch(
-    (err) => {
-      this.error = err;
-      console.error(err);
-      this.loading.dismiss();
-    });
+    ).then(
+      success => {
+        console.log('email auth success');
+        this.loading.dismiss();
+      }).catch(
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.loading.dismiss();
+        this.toast.present();
+      });
 
   }
 

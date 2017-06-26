@@ -5,17 +5,17 @@
     </ion-col>
   </ion-row>
 
-    <ion-row>
-      <div *ngIf="searchUsers" class="search-list-backdrop"></div>
-      <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="setFilteredItems()"></ion-searchbar>
+  <ion-row>
+    <div *ngIf="searchUsers" class="search-list-backdrop"></div>
+    <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="setFilteredItems()"></ion-searchbar>
 
-      <ion-list class="user-search-list">
-          <ion-item *ngFor="let searchUser of searchUsers | async" (click)="clickUser(searchUser)">
-              {{searchUser.displayName}}
-          </ion-item>
-      </ion-list>
-    </ion-row>
-    <form [formGroup]="sendForm" (ngSubmit)="onSubmit(sendForm.value, sendForm.valid)">
+    <ion-list class="user-search-list">
+      <ion-item *ngFor="let searchUser of searchUsers$ | async" (click)="clickUser(searchUser)">
+        {{searchUser.displayName}}
+      </ion-item>
+    </ion-list>
+  </ion-row>
+  <form [formGroup]="sendForm" (ngSubmit)="onSubmit(sendForm.value, sendForm.valid)">
     <ion-row>
       <ion-col>
         <ion-item>

@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { MenuController } from 'ionic-angular';
-import { IonicPage, NavParams, ModalController } from 'ionic-angular';
+import { IonicPage, NavParams, ModalController, Toast, ToastController } from 'ionic-angular';
 import { AnalyticsService } from '../../providers/analytics-service/analytics-service';
 
 import { Subscription } from 'rxjs/Subscription';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 
+import { NewsCardModule } from '../../components/news-card/news-card.module';
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
-import { NewsCardModule } from '../../components/news-card/news-card.module';
+import { User } from '../../interfaces/user-interface';
 
 @IonicPage()
 @Component({
@@ -19,24 +20,33 @@ import { NewsCardModule } from '../../components/news-card/news-card.module';
 export class HomePage {
 
   private userFirstName: string;
-  private user: any;
+  private user: User;
   private userSub$: Subscription;
 
+  private toast: Toast;
+
   constructor(
-    private userService: UserService,
+    private analytics: AnalyticsService,
     private newsService: NewsService,
-    private analytics: AnalyticsService
+    private toastCtrl: ToastController,
+    private userService: UserService
   ) { }
 
   ionViewDidLoad() {
     this.analytics.trackPageView('Home Page');
 
     this.userSub$ = this.userService.user$.subscribe(
-      user => {
-        this.user = user;
+      user => this.user = user,
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error getting user: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
       },
-      err => console.error(err),
-      () => {}
+      () => console.log('home ionViewDidLoad userSub$ obs complete')
     );
   }
 

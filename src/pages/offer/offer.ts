@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, Loading, LoadingController, NavParams } from 'ionic-angular';
+import { IonicPage, Loading, LoadingController, NavParams, Toast, ToastController } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators, } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Camera } from '@ionic-native/camera';
@@ -11,7 +11,9 @@ import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/databa
 import * as firebase from 'firebase';
 
 import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
 import { NewsService } from '../../providers/news-service/news-service';
+import { Offer } from '../../interfaces/offer-interface';
 
 @IonicPage()
 @Component({
@@ -20,38 +22,40 @@ import { NewsService } from '../../providers/news-service/news-service';
 })
 export class OfferPage {
 
-  private user: any;
+  private user: User;
   private userSub$: Subscription;
   private offerForm: FormGroup;
-  private userOffers: FirebaseListObservable<any>;
+  private userOffers$: FirebaseListObservable<Offer[]>;
   private base64ImageData: string;
 
   private loading: Loading;
   private loading2: Loading;
+  private toast: Toast;
 
   constructor(
-    private newsService: NewsService,
-    private userService: UserService,
-    private ds: DomSanitizer,
-    private geo: Geolocation,
-    private camera: Camera,
     private analytics: AnalyticsService,
-    private loadingCtrl: LoadingController,
+    private camera: Camera,
+    private db: AngularFireDatabase,
+    private ds: DomSanitizer,
     private formBuilder: FormBuilder,
-    private db: AngularFireDatabase
+    private geo: Geolocation,
+    private loadingCtrl: LoadingController,
+    private newsService: NewsService,
+    private toastCtrl: ToastController,
+    private userService: UserService
   ) {
 
     this.offerForm = formBuilder.group({
-      picURL: [''],
-      title: ['', Validators.required],
-      price: ['', Validators.required],
-      priceDescription: ['', Validators.required],
-      latitude: [],
-      longitude: []
+      picURL: [null],
+      title: [null, Validators.required],
+      price: [null, Validators.required],
+      priceDescription: [null, Validators.required],
+      latitude: [null],
+      longitude: [null]
     });
   }
 
-  private getCurrentLocation() {
+  private getCurrentLocation():void {
 
     this.loading2 = this.loadingCtrl.create({
       content: 'Saving Location ...',
@@ -60,31 +64,41 @@ export class OfferPage {
 
     this.loading2.present();
 
-    this.geo.getCurrentPosition().then((geo) => {
-      //todo:set a tick mark on the button on success
-      this.offerForm.patchValue({ latitude: geo.coords.latitude });
-      this.offerForm.patchValue({ longitude: geo.coords.longitude });
-      this.offerForm.controls.latitude.markAsDirty();
-      this.offerForm.controls.longitude.markAsDirty();
-      this.loading2.dismiss();
-    }).catch((error) => {
-      console.log('Error getting location', error);
-    });
+    this.geo.getCurrentPosition().then(
+      geo => {
+        //todo:set a tick mark on the button on success
+        this.offerForm.patchValue({ latitude: geo.coords.latitude });
+        this.offerForm.patchValue({ longitude: geo.coords.longitude });
+        this.offerForm.controls.latitude.markAsDirty();
+        this.offerForm.controls.longitude.markAsDirty();
+        this.loading2.dismiss();
+      }).catch(
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error getting location: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        this.loading2.dismiss();
+        console.error(error);
+        this.toast.present();
+      }
+    );
   }
 
-  private onSubmit(formValues, formValid) {
+  private onSubmit(formData: any, formValid: boolean): void {
 
     if (!formValid)
       return;
 
     let offer = {
-      location: [formValues.latitude, formValues.longitude],
+      location: [formData.latitude, formData.longitude],
       picURL: '',
-      price: formValues.price,
-      priceDescription: formValues.priceDescription,
+      price: formData.price,
+      priceDescription: formData.priceDescription,
       seller: this.user.$key,
       timestamp: firebase.database['ServerValue']['TIMESTAMP'],
-      title: formValues.title,
+      title: formData.title,
       type: 'offerListed'
     }
 
@@ -116,7 +130,13 @@ export class OfferPage {
             }
           },
           function(error) {
-            console.log(error);
+            this.toast = this.toastCtrl.create({
+              message: 'Error uploading image: '+error,
+              duration: 3000,
+              position: 'middle'
+            });
+            console.error(error);
+            this.toast.present();
           },
           function() {
             // Upload completed successfully, now we can get the download URL
@@ -125,8 +145,8 @@ export class OfferPage {
 
         uploadTask.then((obj) => {
           offer.picURL = uploadTask.snapshot.downloadURL;
-          this.userOffers.push(offer);
-          this.newsService.addOfferListed(offer);
+          this.userOffers$.push(offer);
+          this.newsService.addOfferListed(<any>offer);//todo: fix types issue here
           this.offerForm.reset();
           this.loading.dismiss();
         });
@@ -134,42 +154,60 @@ export class OfferPage {
       else {
         //generic profile pic
         offer.picURL = "https://firebasestorage.googleapis.com/v0/b/circles-testnet.appspot.com/o/profilepics%2Fgeneric-profile-pic.png?alt=media&token=d151cdb8-115f-483c-b701-e227d52399ef";
-        this.userOffers.push(offer);
-        this.newsService.addOfferListed(offer);
+        this.userOffers$.push(offer);
+        this.newsService.addOfferListed(<any>offer);//todo: fix types issue here
         this.offerForm.reset();
         this.loading.dismiss();
       }
     });
   }
 
-  private selectFromGallery(form) {
+  private selectFromGallery(form: FormGroup):void {
     var options = {
       sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
       destinationType: this.camera.DestinationType.DATA_URL
     };
-    this.camera.getPicture(options).then((imageData) => {
-      // imageData is a base64 encoded string
-      this.base64ImageData = imageData;
-      form.patchValue({ picURL: "data:image/jpeg;base64," + imageData });
-      form.controls.picURL.markAsDirty();
-    }, (err) => {
-      console.log(err);
-    });
+    this.camera.getPicture(options).then(
+      imageData => {
+        // imageData is a base64 encoded string
+        this.base64ImageData = imageData;
+        form.patchValue({ picURL: "data:image/jpeg;base64," + imageData });
+        form.controls.picURL.markAsDirty();
+      },
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error selecting from gallery: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      }
+    );
   }
 
-  private openCamera(form) {
+  private openCamera(form: FormGroup):void {
     var options = {
       sourceType: this.camera.PictureSourceType.CAMERA,
       destinationType: this.camera.DestinationType.DATA_URL
     };
-    this.camera.getPicture(options).then((imageData) => {
-      // imageData is a base64 encoded string
-      this.base64ImageData = imageData;
-      form.patchValue({ picURL: "data:image/jpeg;base64," + imageData });
-      form.controls.picURL.markAsDirty();
-    }, (err) => {
-      console.log(err);
-    });
+    this.camera.getPicture(options).then(
+      imageData => {
+        // imageData is a base64 encoded string
+        this.base64ImageData = imageData;
+        form.patchValue({ picURL: "data:image/jpeg;base64," + imageData });
+        form.controls.picURL.markAsDirty();
+      },
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'Error opening camera: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      }
+    );
   }
 
   ionViewDidLoad() {
@@ -178,14 +216,24 @@ export class OfferPage {
     this.userSub$ = this.userService.user$.subscribe(
       user => {
         this.user = user;
-        this.userOffers = this.db.list('users/' + this.user.$key + '/offers');
+        this.userOffers$ = this.db.list('users/' + this.user.$key + '/offers');
       },
-      err => console.error(err)
+      error => {
+        this.toast = this.toastCtrl.create({
+          message: 'DB error: '+error,
+          duration: 3000,
+          position: 'middle'
+        });
+        console.error(error);
+        this.toast.present();
+      },
+      () => console.log('offer ionViewDidLoad userSub$ obs complete')
     );
   }
 
   ionViewWillUnload () {
     this.userSub$.unsubscribe();
+    this.userOffers$.subscribe().unsubscribe();
   }
 
 }
