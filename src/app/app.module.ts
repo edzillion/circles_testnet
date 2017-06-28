@@ -9,6 +9,7 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { GoogleAnalytics } from '@ionic-native/google-analytics';
 import { Camera } from '@ionic-native/camera';
 import { Geolocation } from '@ionic-native/geolocation';
+import { OneSignal } from '@ionic-native/onesignal';
 
 //app
 import { MyApp } from './app.component';
@@ -28,6 +29,7 @@ import { UserService } from '../providers/user-service/user-service';
 import { TransactionService } from '../providers/transaction-service/transaction-service';
 import { NewsService } from '../providers/news-service/news-service';
 import { AnalyticsService } from '../providers/analytics-service/analytics-service';
+import { PushService } from '../providers/push-service/push-service';
 
 import { NewsCardModule } from '../components/news-card/news-card.module';
 import { GroupCardModule } from '../components/group-card/group-card.module';
@@ -46,6 +48,7 @@ import { TagInputModule } from 'ng2-tag-input';
 //configs
 import { environment } from '../environments/environment';
 import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
+
 
 @NgModule({
   declarations: [
@@ -82,6 +85,7 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
   providers: [
     TransactionService,
     Camera,
+    OneSignal,
     Geolocation,
     StatusBar,
     SplashScreen,
@@ -90,7 +94,8 @@ import { APP_CONFIG, APP_DI_CONFIG } from "./app-config.constants";
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     NewsService,
     UserService,
-    AnalyticsService
+    AnalyticsService,
+    PushService
   ]
 })
 export class AppModule {}
