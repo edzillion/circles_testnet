@@ -10,6 +10,7 @@ export interface User {
   firstName: string;
   lastName: string;
   log: Array<NewsItem>;
+  pushID: string;
   offers: Array<Offer>;
   profilePicURL: string;
   type: string;

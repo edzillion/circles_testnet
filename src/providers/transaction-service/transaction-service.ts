@@ -12,6 +12,7 @@ import { User } from '../../interfaces/user-interface';
 import { NewsItem } from '../../interfaces/news-item-interface';
 import { LogItem } from '../../interfaces/log-item-interface';
 import { Offer } from '../../interfaces/offer-interface';
+import { PushService } from '../../providers/push-service/push-service';
 
 @Injectable()
 export class TransactionService implements OnDestroy {
@@ -24,9 +25,10 @@ export class TransactionService implements OnDestroy {
   private transactionLog$: FirebaseListObservable<LogItem[]>;
 
   constructor(
-    private userService: UserService,
+    private db: AngularFireDatabase,
     private newsService: NewsService,
-    private db: AngularFireDatabase
+    private pushService: PushService,
+    private userService: UserService
   ) {
 
     this.userSub$ = this.userService.user$.subscribe(
@@ -80,6 +82,10 @@ export class TransactionService implements OnDestroy {
 
     this.toUserLog$ = this.db.list('/users/'+toUser.$key+'/log/');
     this.toUserLog$.push(logItem);
+
+    //send push notification
+    this.pushService.push('hey there ed!');
+
   }
 
   public createPurchaseIntent(sellerUserId:string, offer: Offer): Promise<any> {

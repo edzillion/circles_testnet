@@ -10,7 +10,6 @@ import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/databa
 import { NewsCardModule } from '../../components/news-card/news-card.module';
 import { NewsService } from '../../providers/news-service/news-service';
 import { UserService } from '../../providers/user-service/user-service';
-import { PushService } from '../../providers/push-service/push-service';
 import { User } from '../../interfaces/user-interface';
 
 @IonicPage()
@@ -30,8 +29,7 @@ export class HomePage {
     private analytics: AnalyticsService,
     private newsService: NewsService,
     private toastCtrl: ToastController,
-    private userService: UserService,
-    private pushService: PushService
+    private userService: UserService
   ) { }
 
   ionViewDidLoad() {

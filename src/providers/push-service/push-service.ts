@@ -1,15 +1,21 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { OneSignal } from '@ionic-native/onesignal';
+import { OneSignal, OSNotification } from '@ionic-native/onesignal';
 
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/toPromise'
+
 
 import { environment } from '../../environments/environment';
+import { UserService } from '../../providers/user-service/user-service';
+import { User } from '../../interfaces/user-interface';
 
 @Injectable()
 export class PushService implements OnDestroy {
 
-  constructor(private oneSignal: OneSignal) {
-    debugger;
+  private user: User;
+
+  constructor(private oneSignal: OneSignal, private userService: UserService) {
+
     // Enable to debug issues.
     // window.plugins.OneSignal.setLogLevel({logLevel: 4, visualLevel: 4});
 
@@ -27,6 +33,27 @@ export class PushService implements OnDestroy {
 
     this.oneSignal.endInit();
 
+  }
+
+  public async initialise() {
+    this.user = await this.userService.user$.take(1).toPromise();
+    if (this.user.pushID)
+      return;
+
+    let ids = await this.oneSignal.getIds();
+    let updateObject = {pushID: ids.userId};
+    return await this.userService.update(updateObject);
+  }
+
+  public async push(message: String) {
+    // if (user.
+    // let ids = await this.oneSignal.getIds();
+    //
+    //   debugger;
+    // let notificationObj = { contents: {en: message},
+    //                         include_player_ids: [ids.userId]} as OSNotification;
+    // let result = await this.oneSignal.postNotification(notificationObj);
+    // debugger;
   }
 
   ngOnDestroy () {

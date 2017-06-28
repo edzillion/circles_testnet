@@ -9,6 +9,7 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import * as firebase from 'firebase';
 
 import { TabsPage } from '../tabs/tabs';
+import { PushService } from '../../providers/push-service/push-service';
 
 @IonicPage()
 @Component({
@@ -55,6 +56,7 @@ export class ProfilePage {
     private ds: DomSanitizer,
     private formBuilder: FormBuilder,
     private loadingCtrl: LoadingController,
+    private pushService: PushService,
     private navCtrl: NavController,
     private navParams: NavParams,
     private toastCtrl: ToastController
@@ -327,11 +329,12 @@ export class ProfilePage {
             .then((success) => {
 
               console.log('userData save success');
-              this.formState.loading.dismiss();
-              if (this.formState.refilling)
-                this.navCtrl.setRoot(TabsPage);
-              //we don't need to navigate here since our subscription to the user record will fire in app.component
-              //this.navCtrl.setRoot(TabsPage, { user: this.user });
+              this.pushService.initialise().then( () => {
+                console.log('pushService initialised');
+                this.formState.loading.dismiss();
+                if (this.formState.refilling)
+                  this.navCtrl.setRoot(TabsPage);
+              });
             })
             .catch(
             error => {
@@ -353,12 +356,12 @@ export class ProfilePage {
         this.db.object(`users/${this.UID}`).set(this.user).then(
           success => {
             console.log('userData save success');
-            this.formState.loading.dismiss();
-
-            if (this.formState.refilling)
-              this.navCtrl.setRoot(TabsPage);
-            //we don't need to navigate here since our subscription to the user record will fire in app.component
-            //this.navCtrl.setRoot(TabsPage, { user: this.user });
+            this.pushService.initialise().then( () => {
+              console.log('pushService initialised');
+              this.formState.loading.dismiss();
+              if (this.formState.refilling)
+                this.navCtrl.setRoot(TabsPage);
+            });
           }).catch(
           error => {
             this.toast = this.toastCtrl.create({

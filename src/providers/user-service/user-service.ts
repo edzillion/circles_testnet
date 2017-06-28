@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
-import { AngularFireDatabase } from 'angularfire2/database';
+import { AngularFireDatabase, FirebaseObjectObservable } from 'angularfire2/database';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -19,6 +19,7 @@ export class UserService implements OnDestroy {
   private usersSubject$: ReplaySubject<Array<User>> = new ReplaySubject<Array<User>>(1);
 
   public user$: Observable<User>;
+  public userFirebaseObj$: FirebaseObjectObservable<User>;
   public users$ = this.usersSubject$.asObservable();
   public auth: any;
 
@@ -47,7 +48,8 @@ export class UserService implements OnDestroy {
                 this.userSubject$ = new BehaviorSubject(user);
                 this.user$ = this.userSubject$.asObservable();
                 // this.userSubject$ is our app wide current user Subscription
-                this.userSub$ = this.db.object('/users/' + auth.uid).subscribe(
+                this.userFirebaseObj$ = this.db.object('/users/' + auth.uid);
+                this.userSub$ = this.userFirebaseObj$.subscribe(
                   user => {
                     this.user = user;
                     this.userSubject$.next(user);
@@ -71,12 +73,12 @@ export class UserService implements OnDestroy {
               }
             },
             error => console.error(error),
-            () => {}
+            () => { }
           )
         }
       },
       error => console.error(error),
-      () => {}
+      () => { }
     );
   }
 
@@ -88,7 +90,7 @@ export class UserService implements OnDestroy {
 
   public keyToUserName$(key: string): Observable<string> {
     return this.users$.map(users => {
-      let u = users.find( user => user.$key === key);
+      let u = users.find(user => user.$key === key);
       return u.displayName;
     });
   }
@@ -96,8 +98,8 @@ export class UserService implements OnDestroy {
   public filterUsers$(searchTerm: string) {
     if (!searchTerm)
       return false; //todo: should this return an observable(false) or something?
-    return this.users$.map( (users) => {
-      return users.filter( (user) => {
+    return this.users$.map((users) => {
+      return users.filter((user) => {
         if (user.$key == 'undefined' || (user.$key == this.user.$key))
           return false;
         let s = searchTerm.toLowerCase();
@@ -107,7 +109,17 @@ export class UserService implements OnDestroy {
     });
   }
 
-  ngOnDestroy () {
+  public async update(updateObject: Object) {
+    try {
+      let result = await this.userFirebaseObj$.update(updateObject);
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+      throw new Error("userService update fail");
+    }
+  }
+
+  ngOnDestroy() {
     this.authSub$.unsubscribe();
     this.userSub$.unsubscribe();
     this.usersSub$.unsubscribe();
