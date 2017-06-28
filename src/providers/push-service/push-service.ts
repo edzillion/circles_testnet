@@ -4,7 +4,7 @@ import { OneSignal, OSNotification } from '@ionic-native/onesignal';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise'
 
-
+import { LogItem } from '../../interfaces/log-item-interface';
 import { environment } from '../../environments/environment';
 import { UserService } from '../../providers/user-service/user-service';
 import { User } from '../../interfaces/user-interface';
@@ -21,7 +21,7 @@ export class PushService implements OnDestroy {
 
     this.oneSignal.startInit(environment.cloudSettings.push.app_id, environment.cloudSettings.push.sender_id);
 
-    this.oneSignal.inFocusDisplaying(this.oneSignal.OSInFocusDisplayOption.InAppAlert);
+    this.oneSignal.inFocusDisplaying(this.oneSignal.OSInFocusDisplayOption.None);
 
     this.oneSignal.handleNotificationReceived().subscribe(() => {
      console.log('handleNotificationReceived()');
@@ -32,7 +32,6 @@ export class PushService implements OnDestroy {
     });
 
     this.oneSignal.endInit();
-
   }
 
   public async initialise() {
@@ -45,15 +44,13 @@ export class PushService implements OnDestroy {
     return await this.userService.update(updateObject);
   }
 
-  public async push(message: String) {
-    // if (user.
-    // let ids = await this.oneSignal.getIds();
-    //
-    //   debugger;
-    // let notificationObj = { contents: {en: message},
-    //                         include_player_ids: [ids.userId]} as OSNotification;
-    // let result = await this.oneSignal.postNotification(notificationObj);
-    // debugger;
+  public async pushToUser(toUser: User, message: string) {
+    let notificationObj = {
+      contents: {en: message},
+      headings: {en: 'Circles Incoming!'},
+      include_player_ids: [toUser.pushID]
+    } as OSNotification;
+    return await this.oneSignal.postNotification(notificationObj);
   }
 
   ngOnDestroy () {

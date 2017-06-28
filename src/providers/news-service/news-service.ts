@@ -13,6 +13,7 @@ import { User } from '../../interfaces/user-interface';
 import { NewsItem } from '../../interfaces/news-item-interface';
 import { Offer } from '../../interfaces/offer-interface';
 import { Group } from '../../interfaces/group-interface';
+import { PushService } from '../../providers/push-service/push-service';
 
 @Injectable()
 export class NewsService implements OnDestroy {
@@ -26,9 +27,10 @@ export class NewsService implements OnDestroy {
   private newsItems$: BehaviorSubject<NewsItem[]> = new BehaviorSubject([]);
 
   constructor(
-    private userService: UserService,
+    private db: AngularFireDatabase,
     private notificationsService: NotificationsService,
-    private db: AngularFireDatabase
+    private pushService: PushService,
+    private userService: UserService
   ) {
 
     this.userService.user$.take(1).subscribe(
@@ -103,6 +105,10 @@ export class NewsService implements OnDestroy {
       type: 'transaction'
     };
     this.dbNewsItems$.push(newsItem);
+
+    //send push notification to other user
+    msg = 'Receieved ' + txItem.amount + ' Circles from ' + this.user.displayName;
+    this.pushService.pushToUser(txItem.toUser,msg);
   }
 
   public addPurchase(offer: Offer):void {

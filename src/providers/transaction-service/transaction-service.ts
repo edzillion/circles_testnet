@@ -12,7 +12,6 @@ import { User } from '../../interfaces/user-interface';
 import { NewsItem } from '../../interfaces/news-item-interface';
 import { LogItem } from '../../interfaces/log-item-interface';
 import { Offer } from '../../interfaces/offer-interface';
-import { PushService } from '../../providers/push-service/push-service';
 
 @Injectable()
 export class TransactionService implements OnDestroy {
@@ -27,7 +26,6 @@ export class TransactionService implements OnDestroy {
   constructor(
     private db: AngularFireDatabase,
     private newsService: NewsService,
-    private pushService: PushService,
     private userService: UserService
   ) {
 
@@ -70,7 +68,7 @@ export class TransactionService implements OnDestroy {
       "message": message || '',
       "title": offer.title,
       "type": type
-    };
+    } as LogItem;
 
     //add to the main transaction log
     this.transactionLog$.push(logItem);
@@ -82,9 +80,6 @@ export class TransactionService implements OnDestroy {
 
     this.toUserLog$ = this.db.list('/users/'+toUser.$key+'/log/');
     this.toUserLog$.push(logItem);
-
-    //send push notification
-    this.pushService.push('hey there ed!');
 
   }
 
