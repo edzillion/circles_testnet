@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.edzillion.circles_testnet" version="0.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.edzillion.circles_testnet" version="0.2.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Circles Testnet</name>
     <description>Basic Income on the Blockchain</description>
     <author email="edzillion@gmail.com" href="http://www.edzillion.com">edzillion</author>

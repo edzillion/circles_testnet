@@ -5,13 +5,13 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "lib": [
-      "dom",
-      "es2017"
+      "es2017",
+      "dom"
     ],
     "module": "es2015",
     "moduleResolution": "node",
     "sourceMap": true,
-    "target": "es5",
+    "target": "es2017",
     "typeRoots": [
       "../node_modules/@types"
     ]

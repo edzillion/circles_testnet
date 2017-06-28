@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
-import { NotificationsService } from 'angular2-notifications';
+import { NotificationsService, SimpleNotificationsComponent  } from 'angular2-notifications';
 import { AngularFireDatabase, FirebaseListObservable } from 'angularfire2/database';
 import * as firebase from 'firebase/app';
 import { Subscription } from 'rxjs/Subscription';

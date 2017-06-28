@@ -38,19 +38,23 @@ export class TransactionService implements OnDestroy {
     this.transactionLog$ = this.db.list('/transactions/');
   }
 
-  private transfer(toUser:User, amount:number): boolean {
+  private  async transfer(toUser:User, amount:number) {
+    if (this.user.balance < amount)
+      return false;
     let myBalance: number = +this.user.balance;
     let toUserBalance: number = +toUser.balance;
     let txAmount: number = +amount;
-
-    if (myBalance < txAmount)
-      return false;
-
     myBalance -= txAmount;
     toUserBalance += txAmount;
     //todo: add error handling here
-    this.db.object('/users/'+this.user.$key).update({balance: myBalance});
-    this.db.object('/users/'+toUser.$key).update({balance: toUserBalance});
+    try {
+      let a = await this.db.object('/users/'+this.user.$key).update({balance: myBalance});
+      let b = await this.db.object('/users/'+toUser.$key).update({balance: toUserBalance});
+    }
+    catch (error) {
+      console.error(error);
+      throw new Error("Purchase fail");
+    }
     return true;
   }
 
